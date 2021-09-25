@@ -11,6 +11,17 @@ contract FlightSuretyData {
 
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
+    mapping(address => bool) private authorizedCallers;                 // Addresses that can address this contract
+
+    struct Airline {
+        string name;
+        address account;
+        bool isRegistered;
+        bool isFunded;
+        uint256 funds;  // this is just to control how much of the total balance the airlines are using
+    }    
+
+    mapping(address => Airline) private airlines;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -88,6 +99,14 @@ contract FlightSuretyData {
     {
         operational = mode;
     }
+
+    /**
+    * @dev Add a new address to the list of authorized callers
+    *      Can only be called by the contract owner
+    */    
+    function authorizeCaller(address contractAddress) external requireContractOwner {
+        authorizedCallers[contractAddress] = true;
+    }    
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -181,6 +200,11 @@ contract FlightSuretyData {
         fund();
     }
 
-
+   /**
+    * @dev Indicate if the address belongs to an airline or not
+    */   
+    function isAirline(address account) public view returns(bool) {
+        return airlines[account].isRegistered == true;
+    }    
 }
 
