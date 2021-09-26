@@ -34,8 +34,6 @@ contract FlightSuretyApp {
     }
     mapping(bytes32 => Flight) private flights;
 
-    
-
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
@@ -72,7 +70,7 @@ contract FlightSuretyApp {
      */
     constructor() public {
         contractOwner = msg.sender;
-        emit Log(string(abi.encodePacked("contractOwner: ", toAsciiString(contractOwner))));
+        // emit Log(string(abi.encodePacked("contractOwner: ", toAsciiString(contractOwner))));
     }
 
     /********************************************************************************************/
@@ -323,7 +321,7 @@ contract FlightSuretyApp {
     /********************************************************************************************/
     /*                                     TEMP FUNCTIONS                                       */
     /********************************************************************************************/
-    function toAsciiString(address x) internal view returns (string memory) {
+    function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) {
             bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));

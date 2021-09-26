@@ -22,17 +22,21 @@ contract FlightSuretyData {
     }
 
     mapping(address => Airline) private airlines;
+    uint256 internal airlinesNum = 0;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
 
+    event AirlineRegistered(address indexed account, string name);
+
     /**
      * @dev Constructor
      *      The deploying account becomes contractOwner
      */
-    constructor() public {
-        contractOwner = msg.sender;
+    constructor(address firstAirline, string firstAirlineName) public {
+        contractOwner = msg.sender;   
+        addAirline(firstAirline, firstAirlineName);
     }
 
     /********************************************************************************************/
@@ -103,6 +107,31 @@ contract FlightSuretyData {
      *
      */
     function registerAirline() external pure {}
+
+    /**
+     * @dev Add an airline to the registration queue
+     *      Can only be called from FlightSuretyApp contract
+     *
+     */
+    function addAirline(address account, string memory name) private {
+        airlinesNum = airlinesNum.add(1);
+        airlines[account] = Airline(
+            name,
+            account,
+            true,
+            false,
+            0
+        );
+        emit AirlineRegistered(account, name);
+    }
+
+    /**
+     * @dev Get number of registered airlines
+     *
+     */
+    function getAirlinesNum() external view returns (uint256) {
+        return airlinesNum;
+    }
 
     /**
      * @dev Buy insurance for a flight
