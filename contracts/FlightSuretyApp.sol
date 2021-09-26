@@ -5,11 +5,13 @@ pragma solidity ^0.4.25;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./FlightSuretyData.sol";
+import "./LogHelper.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
-contract FlightSuretyApp {
+contract FlightSuretyApp is LogHelper {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
     /********************************************************************************************/
@@ -24,6 +26,8 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
+    uint256 private constant AIRLINES_THRESHOLD = 4;    
+
     address private contractOwner; // Account used to deploy contract
     bool private operational =  true; // Blocks all state changes throughout the contract if false
     struct Flight {
@@ -32,7 +36,12 @@ contract FlightSuretyApp {
         uint256 updatedTimestamp;
         address airline;
     }
+
     mapping(bytes32 => Flight) private flights;
+    FlightSuretyData internal flightSuretyData;
+
+    mapping(address => mapping(address => bool)) private airlineVoters;
+    mapping(address => uint256) private airlineVotesCount;
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -68,9 +77,9 @@ contract FlightSuretyApp {
      * @dev Contract constructor
      *
      */
-    constructor() public {
+    constructor(address dataContract) public {
         contractOwner = msg.sender;
-        // emit Log(string(abi.encodePacked("contractOwner: ", toAsciiString(contractOwner))));
+        flightSuretyData = FlightSuretyData(dataContract);
     }
 
     /********************************************************************************************/
@@ -103,12 +112,29 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline()
-        external
-        pure
-        returns (bool success, uint256 votes)
-    {
-        return (success, 0);
+    function registerAirline(address account, string name)
+        external        
+        returns (bool success, uint256 votes) {
+        require(flightSuretyData.isAirline(msg.sender) == true, "Caller must be a registered airline");
+        require(flightSuretyData.isAirline(account) == false, "Airline is already registered");
+        
+        success = false;
+        votes = 0;
+        if (flightSuretyData.getAirlinesNum() < AIRLINES_THRESHOLD) {
+            success = true;            
+            flightSuretyData.registerAirline(account, name);
+        } else {
+            if (airlineVoters[account][msg.sender] == false) {
+                airlineVotesCount[account] = airlineVotesCount[account].add(1);
+                airlineVoters[account][msg.sender] = true;
+            }
+            votes = airlineVotesCount[account];
+            if (votes >= flightSuretyData.getAirlinesNum() / 2) {
+                success = true;
+                flightSuretyData.registerAirline(account, name);                               
+            }            
+        }        
+        return (success, votes);
     }
 
     /**
@@ -203,11 +229,6 @@ contract FlightSuretyApp {
         address airline,
         string flight,
         uint256 timestamp
-    );
-
-    // Event for logging
-    event Log(
-        string message
     );
 
     // Register an oracle with the contract
@@ -317,24 +338,8 @@ contract FlightSuretyApp {
     }
 
     // endregion
-
-    /********************************************************************************************/
-    /*                                     TEMP FUNCTIONS                                       */
-    /********************************************************************************************/
-    function toAsciiString(address x) internal pure returns (string memory) {
-        bytes memory s = new bytes(40);
-        for (uint i = 0; i < 20; i++) {
-            bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));
-            bytes1 hi = bytes1(uint8(b) / 16);
-            bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
-            s[2*i] = char(hi);
-            s[2*i+1] = char(lo);            
-        }
-        return string(s);
-    }
-
-    function char(bytes1 b) internal pure returns (bytes1 c) {
-        if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
-        else return bytes1(uint8(b) + 0x57);
-    }
 }
+
+// contract FlightSuretyData { 
+//     function registerAirline(address account, string name) external;   
+// }

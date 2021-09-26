@@ -1,8 +1,9 @@
 pragma solidity ^0.4.25;
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./LogHelper.sol";
 
-contract FlightSuretyData {
+contract FlightSuretyData is LogHelper {
     using SafeMath for uint256;
 
     /********************************************************************************************/
@@ -106,12 +107,12 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline() external pure {}
+    function registerAirline(address account, string name) external {          
+        addAirline(account, name);
+    }
 
     /**
-     * @dev Add an airline to the registration queue
-     *      Can only be called from FlightSuretyApp contract
-     *
+     * @dev Register an airline 
      */
     function addAirline(address account, string memory name) private {
         airlinesNum = airlinesNum.add(1);
@@ -178,5 +179,5 @@ contract FlightSuretyData {
      */
     function isAirline(address account) public view returns (bool) {
         return airlines[account].isRegistered == true;
-    }
+    }    
 }

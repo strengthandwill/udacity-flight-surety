@@ -4,11 +4,12 @@ const fs = require('fs');
 
 module.exports = function(deployer, network, accounts) {    
     let firstAirline = accounts[1];
-    let firstAirlineName = 'Singapore Airline';
+    let firstAirlineName = 'First Airline';
     deployer.deploy(FlightSuretyData, firstAirline, firstAirlineName)
-    .then(() => {
-        return deployer.deploy(FlightSuretyApp)
+    .then((dataContractInstance) => {
+        return deployer.deploy(FlightSuretyApp, FlightSuretyData.address)
                 .then(() => {
+                    dataContractInstance.authorizeCaller(FlightSuretyApp.address);
                     let config = {
                         localhost: {
                             url: 'http://localhost:8545',
