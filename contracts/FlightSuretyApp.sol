@@ -28,6 +28,8 @@ contract FlightSuretyApp is LogHelper {
 
     uint256 private constant AIRLINES_THRESHOLD = 4;    
 
+    uint256 public constant MINIMUM_FUNDS = 10 ether;
+
     address private contractOwner; // Account used to deploy contract
     bool private operational =  true; // Blocks all state changes throughout the contract if false
     struct Flight {
@@ -66,6 +68,22 @@ contract FlightSuretyApp is LogHelper {
      */
     modifier requireContractOwner() {
         require(msg.sender == contractOwner, "Caller is not contract owner");
+        _;
+    }
+
+    /**
+     * @dev Modifier that requires the caller to be a registered airline
+     */
+    modifier requireRegisteredAirline() {
+        require(flightSuretyData.isAirline(msg.sender) == true, "Caller must be a registered airline");
+        _;
+    }
+
+    /**
+     * @dev Modifier that requires the caller to be a registered airline
+     */
+    modifier requireFundedAirline() {
+        require(flightSuretyData.isFunded(msg.sender) == true, "Caller must be a funded airline");
         _;
     }
 
@@ -114,8 +132,10 @@ contract FlightSuretyApp is LogHelper {
      */
     function registerAirline(address account, string name)
         external        
+        requireIsOperational
+        requireRegisteredAirline
+        requireFundedAirline
         returns (bool success, uint256 votes) {
-        require(flightSuretyData.isAirline(msg.sender) == true, "Caller must be a registered airline");
         require(flightSuretyData.isAirline(account) == false, "Airline is already registered");
         
         success = false;
@@ -135,6 +155,11 @@ contract FlightSuretyApp is LogHelper {
             }            
         }        
         return (success, votes);
+    }
+
+    function fund() external payable requireIsOperational requireRegisteredAirline {
+        require(msg.value >= MINIMUM_FUNDS, "Not sufficient fund");
+        flightSuretyData.fund.value(msg.value)(msg.sender);
     }
 
     /**

@@ -30,6 +30,7 @@ contract FlightSuretyData is LogHelper {
     /********************************************************************************************/
 
     event AirlineRegistered(address indexed account, string name);
+    event AirlineFunded(address indexed account, uint256 funds);
 
     /**
      * @dev Constructor
@@ -156,7 +157,11 @@ contract FlightSuretyData is LogHelper {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund() public payable {}
+    function fund(address account) public payable {
+        airlines[account].funds = airlines[account].funds.add(msg.value);
+        airlines[account].isFunded = true;
+        emit AirlineFunded(account, msg.value);
+    }
 
     function getFlightKey(
         address airline,
@@ -171,13 +176,22 @@ contract FlightSuretyData is LogHelper {
      *
      */
     function() external payable {
-        fund();
+        require(msg.data.length == 0, "Message data should be empty");
+        require(isAirline(msg.sender), "Caller must be a registered airline");        
+        fund(msg.sender);
     }
 
     /**
-     * @dev Indicate if the address belongs to an airline or not
+     * @dev Indicate if the address belongs to an registered airline or not
      */
     function isAirline(address account) public view returns (bool) {
-        return airlines[account].isRegistered == true;
-    }    
+        return airlines[account].isRegistered;
+    }
+
+    /**
+     * @dev Indicate if the airline is funded or not
+     */
+    function isFunded(address account) public view returns (bool) {
+        return airlines[account].isFunded;
+    }
 }

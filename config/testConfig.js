@@ -27,16 +27,27 @@ var Config = async function(accounts) {
     let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address);
     flightSuretyData.authorizeCaller(flightSuretyApp.address);
 
-    console.log("flightSuretyApp.address: " + flightSuretyApp.address);
-    console.log("flightSuretyData.address: " + flightSuretyData.address);
+    console.log(`    flightSuretyApp : ${flightSuretyApp.address}`);
+    console.log(`    flightSuretyData: ${flightSuretyData.address}`);
+    console.log(`    First Airline   : ${accounts[1]}`);
+    console.log(`    Second Airline  : ${accounts[2]}`);
+    console.log(`    Third Airline   : ${accounts[3]}`);
+    console.log(`    Fourth Airline  : ${accounts[4]}`);
+    console.log(`    Fifth Airline   : ${accounts[5]}`);
+    console.log(`    Tenth Airline   : ${accounts[10]}`);
     
     return {
         owner: owner,
-        firstAirline: firstAirline,
         weiMultiple: (new BigNumber(10)).pow(18),
         testAddresses: testAddresses,
         flightSuretyData: flightSuretyData,
-        flightSuretyApp: flightSuretyApp
+        flightSuretyApp: flightSuretyApp,
+        firstAirline:  { account: accounts[1], name: "First Airline"},
+        secondAirline: { account: accounts[2], name: "Second Airline"},
+        thirdAirline:  { account: accounts[3], name: "Third Airline"},
+        fourthAirline: { account: accounts[4], name: "Fouth Airline"},
+        fifthAirline:  { account: accounts[5], name: "Fifth Airline"},
+        tenthAirline:  { account: accounts[10], name: "Tenth Airline"}
     }
 }
 

@@ -3,6 +3,8 @@ pragma solidity ^0.4.25;
 contract LogHelper {
     event Log(string message);
     event Log(uint message);
+    event Log(bool message);
+    event Log(address message);
     
     function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
