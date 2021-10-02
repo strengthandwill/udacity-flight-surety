@@ -17,66 +17,76 @@ contract('Flight Surety Tests', async (accounts) => {
     /* Operations and Settings                                                              */
     /****************************************************************************************/
 
-    it(`(multiparty) has correct initial isOperational() value`, async function () {
+    describe('Utilty functions', () => {
+        it(`(multiparty) has correct initial isOperational() value`, async function () {
 
-        // Get operating status
-        let status = await config.flightSuretyData.isOperational.call();
-        assert.equal(status, true, "Incorrect initial operating status value");
+            // Get operating status
+            let status = await config.flightSuretyData.isOperational.call();
+            assert.equal(status, true, "Incorrect initial operating status value");
 
-    });
+        });
 
-    it(`(multiparty) can block access to setOperatingStatus() for non-Contract Owner account`, async function () {
+        it(`(multiparty) can block access to setOperatingStatus() for non-Contract Owner account`, async function () {
 
-        // Ensure that access is denied for non-Contract Owner account
-        let accessDenied = false;
-        try {
-            await config.flightSuretyData.setOperatingStatus(false, { from: config.testAddresses[2] });
-        }
-        catch (e) {
-            accessDenied = true;
-        }
-        assert.equal(accessDenied, true, "Access not restricted to Contract Owner");
+            // Ensure that access is denied for non-Contract Owner account
+            let accessDenied = false;
+            try {
+                await config.flightSuretyData.setOperatingStatus(false, { from: config.testAddresses[2] });
+            }
+            catch (e) {
+                accessDenied = true;
+            }
+            assert.equal(accessDenied, true, "Access not restricted to Contract Owner");
 
-    });
+        });
 
-    it(`(multiparty) can allow access to setOperatingStatus() for Contract Owner account`, async function () {
+        it(`(multiparty) can allow access to setOperatingStatus() for Contract Owner account`, async function () {
 
-        // Ensure that access is allowed for Contract Owner account
-        let accessDenied = false;
-        try {
+            // Ensure that access is allowed for Contract Owner account
+            let accessDenied = false;
+            try {
+                await config.flightSuretyData.setOperatingStatus(false);
+            }
+            catch (e) {
+                accessDenied = true;
+            }
+            assert.equal(accessDenied, false, "Access not restricted to Contract Owner");
+
+        });
+
+        it(`(multiparty) can block access to functions using requireIsOperational when operating status is false`, async function () {
+
             await config.flightSuretyData.setOperatingStatus(false);
-        }
-        catch (e) {
-            accessDenied = true;
-        }
-        assert.equal(accessDenied, false, "Access not restricted to Contract Owner");
 
+            let reverted = false;
+            try {
+                await config.flightSurety.setTestingMode(true);
+            }
+            catch (e) {
+                reverted = true;
+            }
+            assert.equal(reverted, true, "Access not blocked for requireIsOperational");
+
+            // Set it back for other tests to work
+            await config.flightSuretyData.setOperatingStatus(true);
+
+        });
     });
 
-    it(`(multiparty) can block access to functions using requireIsOperational when operating status is false`, async function () {
+    describe('Registration of first airlines', () => {
+        it('First airline is registered when contract is deployed', async () => {
+            // ACT
+            let number = await config.flightSuretyData.getAirlinesNum.call();
+            let result = await config.flightSuretyData.isAirline.call(config.firstAirline.airline);
 
-        await config.flightSuretyData.setOperatingStatus(false);
-
-        let reverted = false;
-        try {
-            await config.flightSurety.setTestingMode(true);
-        }
-        catch (e) {
-            reverted = true;
-        }
-        assert.equal(reverted, true, "Access not blocked for requireIsOperational");
-
-        // Set it back for other tests to work
-        await config.flightSuretyData.setOperatingStatus(true);
-
+            // ASSERT
+            assert.equal(number, 1, "Number of registered airlines should be 1");
+            assert.equal(result, true, "First airline is not registered when contract is deployed");
+        });
     });
 
-    describe('Airline can be registered, but does not participate in contract until it submits funding of 10 ether', () => {
-        it('(airline) cannot register an Airline using registerAirline() if it is not funded', async () => {
-
-            // ARRANGE
-            
-
+    describe('Funding of airlines', () => {
+        it('(airline) cannot register an Airline using registerAirline() if it does not submit funding of 10 ether', async () => {            
             // ACT
             let reverted = false;
             try {                
@@ -93,7 +103,7 @@ contract('Flight Surety Tests', async (accounts) => {
             assert.equal(reverted, true, "Only airline that is funded may register a new airline");
         });
 
-        it('(airline) can register an Airline using registerAirline() if it is funded', async () => {
+        it('(airline) can register an Airline using registerAirline() if it submits funding of 10 ether', async () => {
             // ACT
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {
@@ -114,17 +124,7 @@ contract('Flight Surety Tests', async (accounts) => {
         });
     });
 
-    it('First airline is registered when contract is deployed', async () => {
-        // ACT
-        let number = await config.flightSuretyData.getAirlinesNum.call();
-        let result = await config.flightSuretyData.isAirline.call(config.firstAirline.airline);
-
-        // ASSERT
-        assert.equal(number, 1, "Number of registered airlines should be 1");
-        assert.equal(result, true, "First airline is not registered when contract is deployed");
-    });
-
-    describe('Only existing airline may register a new airline until there are at least four airlines registered', () => {
+    describe('Registration of second to fourth airlines', () => {
         it('Non-existing airline cannot register a new airline', async () => {            
             // ACT
             let beforeAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
@@ -145,7 +145,7 @@ contract('Flight Surety Tests', async (accounts) => {
             assert.equal(reverted, true, "Only existing airline may register a new airline");
         });
 
-        it('Existing airline can register a new airline until there are at least four airlines registered', async () => {
+        it('Only existing airline can register a new airline until there are at least four airlines registered', async () => {
             // ACT
             let beforeAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
             try {
@@ -165,7 +165,7 @@ contract('Flight Surety Tests', async (accounts) => {
         });
     });
 
-    describe('Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines', () => {
+    describe('Registration of fifth and subsequent airlines', () => {
         it('Multi-party consensus of less than 50% of registered airlines cannot register a new airline', async () => {
             // ACT
             try {
@@ -205,7 +205,7 @@ contract('Flight Surety Tests', async (accounts) => {
         });
     });
 
-    describe('Passengers can choose from a list of flight numbers and departure', () => {
+    describe('Registration of flights', () => {
         it('Not registered airline is not able to register new flights', async() => {
             // ACT
             let reverted = false;
@@ -255,8 +255,8 @@ contract('Flight Surety Tests', async (accounts) => {
         });
     });
 
-    describe('Passengers may pay up to 1 ether for purchasing flight insurance', () => {
-        it ('Passengers cannot buy flight insurance as pay more than 1 ether', async() => {
+    describe('Passenger payment', () => {
+        it ('Passenger cannot pay more than 1 ether for purchasing flight insurance', async() => {
             // ACT
             let reverted = false;
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
@@ -285,7 +285,7 @@ contract('Flight Surety Tests', async (accounts) => {
             assert.equal(reverted, true, "Passenger can only buy flight insurance less than or equal to 1 ether");
         });
 
-        it ('Passengers cannot buy flight insurance as pay less than or equal to 1 ether', async() => {
+        it ('Passenger can pay up to 1 ether for purchasing flight insurance', async() => {
             // ACT
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {                
@@ -313,19 +313,19 @@ contract('Flight Surety Tests', async (accounts) => {
         });
     });
 
-    // describe("Passenger Repayment", () => {
-    //     it ("If flight is not delayed, passenger does not receive credit", async() => {
+    describe("Passenger repayment", () => {
+        it ("If flight is not delayed, passenger does not receive credit", async() => {
 
-    //     });
+        });
 
-    //     it ("If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid", async() => {
+        it ("If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid", async() => {
 
-    //     });
+        });
 
-    //     it("Insurance payouts are not sent directly to passenger’s wallet", async() => {
+        it("Insurance payouts are not sent directly to passenger’s wallet", async() => {
 
-    //     });           
-    // });
+        });           
+    });
 
     // describe("Passenger Withdraw", () => {
     //     it("Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout", async() => {
