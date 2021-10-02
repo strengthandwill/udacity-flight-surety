@@ -26,7 +26,8 @@ contract FlightSuretyApp is LogHelper {
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
-    uint256 private constant AIRLINES_THRESHOLD = 4;    
+    uint256 private constant AIRLINES_THRESHOLD = 4;  
+    uint256 public constant MAX_INSURANCE_COST = 1 ether;  
 
     uint256 public constant MINIMUM_FUNDS = 10 ether;
 
@@ -35,8 +36,10 @@ contract FlightSuretyApp is LogHelper {
     struct Flight {
         bool isRegistered;
         uint8 statusCode;
-        uint256 updatedTimestamp;
-        address airline;
+        uint256 timestamp;
+        address airline;   
+        string origin;
+        string destination;
     }
 
     mapping(bytes32 => Flight) private flights;
@@ -83,9 +86,9 @@ contract FlightSuretyApp is LogHelper {
      * @dev Modifier that requires the caller to be a registered airline
      */
     modifier requireFundedAirline() {
-        require(flightSuretyData.isFunded(msg.sender) == true, "Caller must be a funded airline");
+        require(flightSuretyData.isAirlineFunded(msg.sender) == true, "Caller must be a funded airline");
         _;
-    }
+    }   
 
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
@@ -157,6 +160,10 @@ contract FlightSuretyApp is LogHelper {
         return (success, votes);
     }
 
+    /**
+     * @dev Registered airline add fund.
+     *
+     */
     function fund() external payable requireIsOperational requireRegisteredAirline {
         require(msg.value >= MINIMUM_FUNDS, "Not sufficient fund");
         flightSuretyData.fund.value(msg.value)(msg.sender);
@@ -166,7 +173,50 @@ contract FlightSuretyApp is LogHelper {
      * @dev Register a future flight for insuring.
      *
      */
-    function registerFlight() external pure {}
+    function registerFlight(string flight, uint256 timestamp, string origin, string destination) 
+        external
+        requireIsOperational
+        requireRegisteredAirline
+        requireFundedAirline { 
+        require(isFlight(msg.sender, flight, timestamp) == false, "Flight is already registered");
+
+        bytes32 key = getFlightKey(msg.sender, flight, timestamp);        
+        flights[key] = Flight(
+            true,
+            0,
+            timestamp,
+            msg.sender,
+            origin,
+            destination
+        );
+
+        emit FlightRegistered(msg.sender, flight, timestamp, origin, destination);
+    }
+
+    /**
+     * @dev Indicate if the flight belongs to an registered flight or not     
+     *
+     */
+    function isFlight(address airline, string flight, uint256 timestamp) public view returns (bool) {   
+        bytes32 key = getFlightKey(airline, flight, timestamp);     
+        return flights[key].isRegistered;
+    }
+
+    /**
+     * @dev Passenger buy insurance for a flight
+     *
+     */
+    function buyInsurance(address airline, string flight, uint256 timestamp) 
+        external 
+        payable 
+        requireIsOperational {
+        
+        require(flightSuretyData.isAirline(msg.sender) == false, "Airlines cannot buy flight insurance");
+        require(msg.value > 0, "Value sent must be greater than 0");
+        require(msg.value <= MAX_INSURANCE_COST, "Value sent exceeded the maximum allowed");
+        require(isFlight(airline, flight, timestamp) == true, "Flight is not registered");
+        flightSuretyData.buy.value(msg.value)(msg.sender, airline, flight, timestamp);
+    }
 
     /**
      * @dev Called after oracle has updated flight status
@@ -197,7 +247,7 @@ contract FlightSuretyApp is LogHelper {
         });
 
         emit OracleRequest(index, airline, flight, timestamp);
-    }
+    }    
 
     // region ORACLE MANAGEMENT
 
@@ -254,6 +304,15 @@ contract FlightSuretyApp is LogHelper {
         address airline,
         string flight,
         uint256 timestamp
+    );
+
+    // Event fired when new flight is registered
+    event FlightRegistered(
+        address indexed airline,
+        string indexed flight,
+        uint256 indexed timestamp,
+        string origin,
+        string destination
     );
 
     // Register an oracle with the contract

@@ -19,9 +19,7 @@ var Config = async function(accounts) {
         "0x2f2899d6d35b1a48a4fbdc93a37a72f264a9fca7"
     ];
 
-
     let owner = accounts[0];
-    let firstAirline = accounts[1];
 
     let flightSuretyData = await FlightSuretyData.new(accounts[1], "First Airline");
     let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address);
@@ -35,6 +33,7 @@ var Config = async function(accounts) {
     console.log(`    Fourth Airline  : ${accounts[4]}`);
     console.log(`    Fifth Airline   : ${accounts[5]}`);
     console.log(`    Tenth Airline   : ${accounts[10]}`);
+    console.log(`    First Passenger : ${accounts[11]}`);
     
     return {
         owner: owner,
@@ -47,7 +46,9 @@ var Config = async function(accounts) {
         thirdAirline:  { account: accounts[3], name: "Third Airline"},
         fourthAirline: { account: accounts[4], name: "Fouth Airline"},
         fifthAirline:  { account: accounts[5], name: "Fifth Airline"},
-        tenthAirline:  { account: accounts[10], name: "Tenth Airline"}
+        tenthAirline:  { account: accounts[10], name: "Tenth Airline"},
+        firstFlight: { flight: "SQ123", timestamp: 12345678, origin: "Singapore", destination: "Hong Kong" },
+        firstPassenger :  accounts[11]
     }
 }
 

@@ -22,8 +22,18 @@ contract FlightSuretyData is LogHelper {
         uint256 funds; // this is just to control how much of the total balance the airlines are using
     }
 
+    struct Insurance {
+        address insuree;  
+        uint256 paid;
+        address airline;
+        string flight;
+        uint256 timestamp;
+    }    
+
     mapping(address => Airline) private airlines;
     uint256 internal airlinesNum = 0;
+
+    mapping(bytes32 => Insurance[]) private insurances;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -31,6 +41,7 @@ contract FlightSuretyData is LogHelper {
 
     event AirlineRegistered(address indexed account, string name);
     event AirlineFunded(address indexed account, uint256 funds);
+    event InsuranceBought(address insuree, uint256 paid, address airline, string flight, uint256 timestamp);
 
     /**
      * @dev Constructor
@@ -139,7 +150,18 @@ contract FlightSuretyData is LogHelper {
      * @dev Buy insurance for a flight
      *
      */
-    function buy() external payable {}
+    function buy(address passenger, address airline, string flight, uint256 timestamp) external payable {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        airlines[airline].funds = airlines[airline].funds.add(msg.value);
+        insurances[key].push(Insurance(
+            passenger, 
+            msg.value,
+            airline, 
+            flight, 
+            timestamp));
+        emit Log(airlines[airline].funds);
+        emit InsuranceBought(passenger, msg.value, airline, flight, timestamp);
+     }   
 
     /**
      *  @dev Credits payouts to insurees
@@ -191,7 +213,29 @@ contract FlightSuretyData is LogHelper {
     /**
      * @dev Indicate if the airline is funded or not
      */
-    function isFunded(address account) public view returns (bool) {
+    function isAirlineFunded(address account) public view returns (bool) {
         return airlines[account].isFunded;
     }
+
+    /**
+     * @dev Get funds of the airline
+     */
+    function getAirlineFunds(address account) public view returns (uint256) {
+        return airlines[account].funds;
+    }    
+
+    /**
+     * @dev Indicate if the passenger has bought insurance for a flight or not     
+     *
+     */
+    function isInsuranceBought(address passenger, address airline, string flight, uint256 timestamp) public view returns (bool) {           
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        airlines[airline].funds = airlines[airline].funds.add(msg.value);
+        for (uint i=0; i < insurances[key].length; i++) {
+            if (insurances[key][i].insuree == passenger) {
+                return true;
+            }
+        }
+        return false;
+    }  
 }
