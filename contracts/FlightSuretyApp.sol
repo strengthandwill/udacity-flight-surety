@@ -133,28 +133,28 @@ contract FlightSuretyApp is LogHelper {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address account, string name)
+    function registerAirline(address airline, string name)
         external        
         requireIsOperational
         requireRegisteredAirline
         requireFundedAirline
         returns (bool success, uint256 votes) {
-        require(flightSuretyData.isAirline(account) == false, "Airline is already registered");
+        require(flightSuretyData.isAirline(airline) == false, "Airline is already registered");
         
         success = false;
         votes = 0;
         if (flightSuretyData.getAirlinesNum() < AIRLINES_THRESHOLD) {
             success = true;            
-            flightSuretyData.registerAirline(account, name);
+            flightSuretyData.registerAirline(airline, name);
         } else {
-            if (airlineVoters[account][msg.sender] == false) {
-                airlineVotesCount[account] = airlineVotesCount[account].add(1);
-                airlineVoters[account][msg.sender] = true;
+            if (airlineVoters[airline][msg.sender] == false) {
+                airlineVotesCount[airline] = airlineVotesCount[airline].add(1);
+                airlineVoters[airline][msg.sender] = true;
             }
-            votes = airlineVotesCount[account];
+            votes = airlineVotesCount[airline];
             if (votes >= flightSuretyData.getAirlinesNum() / 2) {
                 success = true;
-                flightSuretyData.registerAirline(account, name);                               
+                flightSuretyData.registerAirline(airline, name);                               
             }            
         }        
         return (success, votes);

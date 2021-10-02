@@ -16,7 +16,7 @@ contract FlightSuretyData is LogHelper {
 
     struct Airline {
         string name;
-        address account;
+        address airline;
         bool isRegistered;
         bool isFunded;
         uint256 funds; // this is just to control how much of the total balance the airlines are using
@@ -39,8 +39,8 @@ contract FlightSuretyData is LogHelper {
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
 
-    event AirlineRegistered(address indexed account, string name);
-    event AirlineFunded(address indexed account, uint256 funds);
+    event AirlineRegistered(address indexed airline, string name);
+    event AirlineFunded(address indexed airline, uint256 funds);
     event InsuranceBought(address insuree, uint256 paid, address airline, string flight, uint256 timestamp);
 
     /**
@@ -119,23 +119,23 @@ contract FlightSuretyData is LogHelper {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address account, string name) external {          
-        addAirline(account, name);
+    function registerAirline(address airline, string name) external {          
+        addAirline(airline, name);
     }
 
     /**
      * @dev Register an airline 
      */
-    function addAirline(address account, string memory name) private {
+    function addAirline(address airline, string memory name) private {
         airlinesNum = airlinesNum.add(1);
-        airlines[account] = Airline(
+        airlines[airline] = Airline(
             name,
-            account,
+            airline,
             true,
             false,
             0
         );
-        emit AirlineRegistered(account, name);
+        emit AirlineRegistered(airline, name);
     }
 
     /**
@@ -179,10 +179,10 @@ contract FlightSuretyData is LogHelper {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund(address account) public payable {
-        airlines[account].funds = airlines[account].funds.add(msg.value);
-        airlines[account].isFunded = true;
-        emit AirlineFunded(account, msg.value);
+    function fund(address airline) public payable {
+        airlines[airline].funds = airlines[airline].funds.add(msg.value);
+        airlines[airline].isFunded = true;
+        emit AirlineFunded(airline, msg.value);
     }
 
     function getFlightKey(
@@ -206,22 +206,22 @@ contract FlightSuretyData is LogHelper {
     /**
      * @dev Indicate if the address belongs to an registered airline or not
      */
-    function isAirline(address account) public view returns (bool) {
-        return airlines[account].isRegistered;
+    function isAirline(address airline) public view returns (bool) {
+        return airlines[airline].isRegistered;
     }
 
     /**
      * @dev Indicate if the airline is funded or not
      */
-    function isAirlineFunded(address account) public view returns (bool) {
-        return airlines[account].isFunded;
+    function isAirlineFunded(address airline) public view returns (bool) {
+        return airlines[airline].isFunded;
     }
 
     /**
      * @dev Get funds of the airline
      */
-    function getAirlineFunds(address account) public view returns (uint256) {
-        return airlines[account].funds;
+    function getAirlineFunds(address airline) public view returns (uint256) {
+        return airlines[airline].funds;
     }    
 
     /**

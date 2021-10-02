@@ -3,9 +3,7 @@ var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
 
 const ONE_ETHER = web3.utils.toWei("1", "ether");
-const TEN_ETHER = web3.utils.toWei("10", "ether");    
-
-const INSURANCE_MAX = ONE_ETHER;
+const TEN_ETHER = web3.utils.toWei("10", "ether");
 
 contract('Flight Surety Tests', async (accounts) => {
 
@@ -81,15 +79,14 @@ contract('Flight Surety Tests', async (accounts) => {
 
             // ACT
             let reverted = false;
-            try {
-                let value = web3.utils.toWei("1", "ether");
-                await config.flightSuretyApp.fund({from: config.firstAirline.account, value: value});
-                await config.flightSuretyApp.registerAirline(config.secondAirline.account, config.secondAirline.name, {from: config.firstAirline.account});
+            try {                
+                await config.flightSuretyApp.fund({from: config.firstAirline.airline, value: ONE_ETHER});
+                await config.flightSuretyApp.registerAirline(config.secondAirline.airline, config.secondAirline.name, {from: config.firstAirline.airline});
             }
             catch (e) {
                 reverted = true;                
             }
-            let result = await config.flightSuretyData.isAirline.call(config.secondAirline.account);
+            let result = await config.flightSuretyData.isAirline.call(config.secondAirline.airline);
 
             // ASSERT
             assert.equal(result, false, "Airline should not be able to register another airline if it hasn't provided funding");
@@ -97,30 +94,30 @@ contract('Flight Surety Tests', async (accounts) => {
         });
 
         it('(airline) can register an Airline using registerAirline() if it is funded', async () => {
-
-            // ARRANGE
-            let newAirline = accounts[10];
-
             // ACT
+            let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {
-                let value = web3.utils.toWei("10", "ether");
-                await config.flightSuretyApp.fund({from: config.firstAirline.account, value: value});
-                await config.flightSuretyApp.registerAirline(config.secondAirline.account, config.secondAirline.name, {from: config.firstAirline.account});
+                await config.flightSuretyApp.fund({from: config.firstAirline.airline, value: TEN_ETHER});
+                await config.flightSuretyApp.registerAirline(config.secondAirline.airline, config.secondAirline.name, {from: config.firstAirline.airline});
             }
             catch(e) { 
                 console.log(e.message);
             }
-            let result = await config.flightSuretyData.isAirline.call(config.secondAirline.account); 
-
+            let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);
+            let result = await config.flightSuretyData.isAirline.call(config.secondAirline.airline); 
+            
             // ASSERT
+            assert.equal(beforeAirlineFunds, 0);
+            assert.equal(afterAirlineFunds, TEN_ETHER);
             assert.equal(result, true, "Airline should be able to register another airline if it has provided funding");            
+            
         });
     });
 
     it('First airline is registered when contract is deployed', async () => {
         // ACT
         let number = await config.flightSuretyData.getAirlinesNum.call();
-        let result = await config.flightSuretyData.isAirline.call(config.firstAirline.account);
+        let result = await config.flightSuretyData.isAirline.call(config.firstAirline.airline);
 
         // ASSERT
         assert.equal(number, 1, "Number of registered airlines should be 1");
@@ -133,13 +130,13 @@ contract('Flight Surety Tests', async (accounts) => {
             let beforeAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
             let reverted = false;
             try {
-                await config.flightSuretyApp.registerAirline(config.thirdAirline.account, config.thirdAirline.name, { from: config.tenthAirline.account });
+                await config.flightSuretyApp.registerAirline(config.thirdAirline.airline, config.thirdAirline.name, { from: config.tenthAirline.airline });
             }
             catch (e) {
                 reverted = true;
             }
             let afterAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
-            let result = await config.flightSuretyData.isAirline.call(config.thirdAirline.account);
+            let result = await config.flightSuretyData.isAirline.call(config.thirdAirline.airline);
 
             // ASSERT
             assert.equal(beforeAirlinesNum, 2, "Before number of registered airlines should be 1");
@@ -152,13 +149,13 @@ contract('Flight Surety Tests', async (accounts) => {
             // ACT
             let beforeAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
             try {
-                await config.flightSuretyApp.registerAirline(config.thirdAirline.account, config.thirdAirline.name, { from: config.firstAirline.account });
-                await config.flightSuretyApp.registerAirline(config.fourthAirline.account, config.fourthAirline.name, { from: config.firstAirline.account });                
+                await config.flightSuretyApp.registerAirline(config.thirdAirline.airline, config.thirdAirline.name, { from: config.firstAirline.airline });
+                await config.flightSuretyApp.registerAirline(config.fourthAirline.airline, config.fourthAirline.name, { from: config.firstAirline.airline });                
             }
             catch (e) { }
             let afterAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
-            let result3 = await config.flightSuretyData.isAirline.call(config.thirdAirline.account);
-            let result4 = await config.flightSuretyData.isAirline.call(config.fourthAirline.account);
+            let result3 = await config.flightSuretyData.isAirline.call(config.thirdAirline.airline);
+            let result4 = await config.flightSuretyData.isAirline.call(config.fourthAirline.airline);
 
             // ASSERT
             assert.equal(beforeAirlinesNum, 2, "Before number of registered airlines should be 1");
@@ -172,14 +169,14 @@ contract('Flight Surety Tests', async (accounts) => {
         it('Multi-party consensus of less than 50% of registered airlines cannot register a new airline', async () => {
             // ACT
             try {
-                await config.flightSuretyApp.registerAirline(config.fifthAirline.account, config.fifthAirline.name, { from: config.firstAirline.account });
-                await config.flightSuretyApp.registerAirline(config.fifthAirline.account, config.fifthAirline.name, { from: config.firstAirline.account });
+                await config.flightSuretyApp.registerAirline(config.fifthAirline.airline, config.fifthAirline.name, { from: config.firstAirline.airline });
+                await config.flightSuretyApp.registerAirline(config.fifthAirline.airline, config.fifthAirline.name, { from: config.firstAirline.airline });
             }
             catch (e) {
                 console.log(e);
             }
             let beforeAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
-            let result = await config.flightSuretyData.isAirline.call(config.fifthAirline.account);
+            let result = await config.flightSuretyData.isAirline.call(config.fifthAirline.airline);
             let afterAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
 
             // ASSERT
@@ -192,15 +189,14 @@ contract('Flight Surety Tests', async (accounts) => {
             // ACT
             let beforeAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
             try {
-                let value = web3.utils.toWei("10", "ether");
-                await config.flightSuretyApp.fund({from: config.secondAirline.account, value: value});
-                await config.flightSuretyApp.registerAirline(config.fifthAirline.account, config.fifthAirline.name, { from: config.secondAirline.account });
+                await config.flightSuretyApp.fund({from: config.secondAirline.airline, value: TEN_ETHER});
+                await config.flightSuretyApp.registerAirline(config.fifthAirline.airline, config.fifthAirline.name, { from: config.secondAirline.airline });
             }
             catch (e) {
                 console.log(e);
             }
             let afterAirlinesNum = await config.flightSuretyData.getAirlinesNum.call();
-            let result = await config.flightSuretyData.isAirline.call(config.fifthAirline.account);
+            let result = await config.flightSuretyData.isAirline.call(config.fifthAirline.airline);
 
             // ASSERT
             assert.equal(beforeAirlinesNum, 4, "Before number of registered airlines should be 4");
@@ -209,7 +205,7 @@ contract('Flight Surety Tests', async (accounts) => {
         });
     });
 
-    describe('Register flights', () => {
+    describe('Passengers can choose from a list of flight numbers and departure', () => {
         it('Not registered airline is not able to register new flights', async() => {
             // ACT
             let reverted = false;
@@ -219,13 +215,13 @@ contract('Flight Surety Tests', async (accounts) => {
                     config.firstFlight.timestamp, 
                     config.firstFlight.origin, 
                     config.firstFlight.destination,
-                    { from: config.tenthAirline.account });
+                    { from: config.tenthAirline.airline });
             }
             catch (e) {  
                 reverted = true;                
             }
             let result = await config.flightSuretyApp.isFlight.call(
-                config.tenthAirline.account,
+                config.tenthAirline.airline,
                 config.firstFlight.flight, 
                 config.firstFlight.timestamp
             );
@@ -243,13 +239,13 @@ contract('Flight Surety Tests', async (accounts) => {
                     config.firstFlight.timestamp, 
                     config.firstFlight.origin, 
                     config.firstFlight.destination,
-                    { from: config.firstAirline.account });
+                    { from: config.firstAirline.airline });
             }
             catch (e) {
                 console.log(e);
             }
             let result = await config.flightSuretyApp.isFlight.call(
-                config.firstAirline.account,
+                config.firstAirline.airline,
                 config.firstFlight.flight, 
                 config.firstFlight.timestamp
             );
@@ -263,10 +259,10 @@ contract('Flight Surety Tests', async (accounts) => {
         it ('Passengers cannot buy flight insurance as pay more than 1 ether', async() => {
             // ACT
             let reverted = false;
-            let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.account);            
+            let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {                
                 await config.flightSuretyApp.buyInsurance(
-                    config.firstAirline.account,                    
+                    config.firstAirline.airline,                    
                     config.firstFlight.flight, 
                     config.firstFlight.timestamp,                     
                     { from: config.firstPassenger, value: TEN_ETHER });
@@ -276,11 +272,11 @@ contract('Flight Surety Tests', async (accounts) => {
             }
             let result = await config.flightSuretyData.isInsuranceBought.call(
                 config.firstPassenger,
-                config.firstAirline.account,
+                config.firstAirline.airline,
                 config.firstFlight.flight, 
                 config.firstFlight.timestamp
             );
-            let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.account);
+            let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);
 
             // ASSERT
             assert.equal(beforeAirlineFunds, TEN_ETHER);                        
@@ -291,10 +287,10 @@ contract('Flight Surety Tests', async (accounts) => {
 
         it ('Passengers cannot buy flight insurance as pay less than or equal to 1 ether', async() => {
             // ACT
-            let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.account);            
+            let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {                
                 await config.flightSuretyApp.buyInsurance(
-                    config.firstAirline.account,                    
+                    config.firstAirline.airline,                    
                     config.firstFlight.flight, 
                     config.firstFlight.timestamp,                     
                     { from: config.firstPassenger, value: ONE_ETHER });
@@ -304,11 +300,11 @@ contract('Flight Surety Tests', async (accounts) => {
             }
             let result = await config.flightSuretyData.isInsuranceBought.call(
                 config.firstPassenger,
-                config.firstAirline.account,
+                config.firstAirline.airline,
                 config.firstFlight.flight, 
                 config.firstFlight.timestamp
             );
-            let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.account);
+            let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);
 
             // ASSERT
             assert.equal(beforeAirlineFunds, TEN_ETHER);                        
