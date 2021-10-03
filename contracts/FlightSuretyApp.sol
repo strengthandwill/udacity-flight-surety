@@ -202,6 +202,15 @@ contract FlightSuretyApp is LogHelper {
     function isFlight(address airline, string flight, uint256 timestamp) public view returns (bool) {   
         bytes32 key = getFlightKey(airline, flight, timestamp);     
         return flights[key].isRegistered;
+    }
+
+    /**
+     * @dev Get the current status code and updates timestamp for a flight
+     *
+     */
+    function getFlightStatus(address airline, string flight, uint256 timestamp) public view returns (uint256 statusCode, uint256 updatedTimestamp) {   
+        bytes32 key = getFlightKey(airline, flight, timestamp);     
+        return (flights[key].statusCode, flights[key].updatedTimestamp);
     }  
 
     /**
@@ -382,7 +391,7 @@ contract FlightSuretyApp is LogHelper {
         );
 
         return oracles[msg.sender].indexes;
-    }
+    }    
 
     // Called by oracle when a response is available to an outstanding request
     // For the response to be accepted, there must be a pending request that is open
@@ -404,7 +413,7 @@ contract FlightSuretyApp is LogHelper {
 
         bytes32 key = keccak256(
             abi.encodePacked(index, airline, flight, timestamp)
-        );
+        );        
         require(
             oracleResponses[key].isOpen,
             "Flight or timestamp do not match oracle request"

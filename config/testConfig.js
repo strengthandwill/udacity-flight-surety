@@ -20,7 +20,6 @@ var Config = async function(accounts) {
     ];
 
     let owner = accounts[0];
-
     let flightSuretyData = await FlightSuretyData.new(accounts[1], "First Airline");
     let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address);
     flightSuretyData.authorizeCaller(flightSuretyApp.address);
@@ -37,20 +36,20 @@ var Config = async function(accounts) {
     console.log(`    Second Passenger: ${accounts[12]}`);
     
     return {
-        owner: owner,
-        weiMultiple: (new BigNumber(10)).pow(18),
-        testAddresses: testAddresses,
+        owner           : owner,
+        weiMultiple     : (new BigNumber(10)).pow(18),
+        testAddresses   : testAddresses,
         flightSuretyData: flightSuretyData,
-        flightSuretyApp: flightSuretyApp,
-        firstAirline:  { airline: accounts[1], name: "First Airline"},
-        secondAirline: { airline: accounts[2], name: "Second Airline"},
-        thirdAirline:  { airline: accounts[3], name: "Third Airline"},
-        fourthAirline: { airline: accounts[4], name: "Fouth Airline"},
-        fifthAirline:  { airline: accounts[5], name: "Fifth Airline"},
-        tenthAirline:  { airline: accounts[10], name: "Tenth Airline"},
-        firstFlight: { flight: "SQ123", timestamp: 12345678, origin: "Singapore", destination: "Hong Kong" },
-        firstPassenger :  accounts[11],
-        secondPassenger:  accounts[12]
+        flightSuretyApp : flightSuretyApp,
+        firstAirline    : { airline: accounts[1], name: "First Airline"},
+        secondAirline   : { airline: accounts[2], name: "Second Airline"},
+        thirdAirline    : { airline: accounts[3], name: "Third Airline"},
+        fourthAirline   : { airline: accounts[4], name: "Fouth Airline"},
+        fifthAirline    : { airline: accounts[5], name: "Fifth Airline"},
+        tenthAirline    : { airline: accounts[10], name: "Tenth Airline"},
+        firstFlight     : { flight: "ND1309", timestamp: 12345678, origin: "Singapore", destination: "Hong Kong" },
+        firstPassenger  : accounts[11],
+        secondPassenger : accounts[12]
     }
 }
 
