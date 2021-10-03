@@ -34,6 +34,7 @@ var Config = async function(accounts) {
     console.log(`    Fifth Airline   : ${accounts[5]}`);
     console.log(`    Tenth Airline   : ${accounts[10]}`);
     console.log(`    First Passenger : ${accounts[11]}`);
+    console.log(`    Second Passenger: ${accounts[12]}`);
     
     return {
         owner: owner,
@@ -48,7 +49,8 @@ var Config = async function(accounts) {
         fifthAirline:  { airline: accounts[5], name: "Fifth Airline"},
         tenthAirline:  { airline: accounts[10], name: "Tenth Airline"},
         firstFlight: { flight: "SQ123", timestamp: 12345678, origin: "Singapore", destination: "Hong Kong" },
-        firstPassenger :  accounts[11]
+        firstPassenger :  accounts[11],
+        secondPassenger:  accounts[12]
     }
 }
 

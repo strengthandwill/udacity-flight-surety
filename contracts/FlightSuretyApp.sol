@@ -229,13 +229,26 @@ contract FlightSuretyApp is LogHelper {
         requireIsOperational {
 
         require(isFlight(airline, flight, timestamp) == true, "Flight is not registered");
-        require(flightSuretyData.isInsuree(msg.sender) == false, "Caller is not registered insuree");
 
         bytes32 key = getFlightKey(airline, flight, timestamp);
         require(flights[key].statusCode == STATUS_CODE_LATE_AIRLINE, "Flight should be delayed due to airline fault for insurance payout");
 
         flightSuretyData.creditInsurees(airline, flight, timestamp);
-    }    
+    }
+
+    /**
+     * @dev Allow insuree to withdraw the payout
+     *
+     */
+    function withdrawPayout() 
+        external  
+        requireIsOperational {
+
+        require(flightSuretyData.isInsuree(msg.sender), "Caller is not registered insuree");
+        require(flightSuretyData.getInsureePayout(msg.sender) > 0, "Caller does not have insurance payout");
+
+        flightSuretyData.pay(msg.sender);
+    }
 
     /**
      * @dev Called after oracle has updated flight status

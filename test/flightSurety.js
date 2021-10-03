@@ -261,7 +261,7 @@ contract('Flight Surety Tests', async (accounts) => {
     });
 
     describe('Passenger payment', () => {
-        it ('Passenger cannot pay more than 1 ether for purchasing flight insurance', async() => {
+        it('Passenger cannot pay more than 1 ether for purchasing flight insurance', async() => {
             // ACT
             let reverted = false;
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
@@ -290,7 +290,7 @@ contract('Flight Surety Tests', async (accounts) => {
             assert.equal(reverted, true, "Passenger can only buy flight insurance less than or equal to 1 ether");
         });
 
-        it ('Passenger can pay up to 1 ether for purchasing flight insurance', async() => {
+        it('Passenger can pay up to 1 ether for purchasing flight insurance', async() => {
             // ACT
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {                
@@ -318,8 +318,8 @@ contract('Flight Surety Tests', async (accounts) => {
         });
     });
 
-    describe("Passenger repayment", () => {
-        it ("If flight is not delayed due to airline fault, passenger does not receive credit", async() => {
+    describe('Passenger repayment', () => {
+        it ('If flight is not delayed due to airline fault, passenger does not receive credit', async() => {
             // ACT
             const ONE_HALF_ETHER = web3.utils.toWei("1.5", "ether");
             const ELEVEN_ETHER = web3.utils.toWei("11", "ether");
@@ -351,14 +351,14 @@ contract('Flight Surety Tests', async (accounts) => {
             assert.equal(beforeAirlineFunds, ELEVEN_ETHER);
             assert.equal(afterInsureePayout, 0);            
             assert.equal(afterAirlineFunds, ELEVEN_ETHER);
-            assert.equal(reverted, true, "Passenger can only recevie credit if flight us delayed due to airline fault");
-            
+            assert.equal(reverted, true, "Passenger can only recevie credit if flight us delayed due to airline fault");        
         });
 
-        it ("If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid", async() => {
+        it ("If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid and\n\tInsurance payouts are not sent directly to passenger’s wallet", async() => {
             // ACT
             let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);            
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
+            let beforeBalance = await await web3.eth.getBalance(config.firstPassenger);                        
             try {                              
                 await config.flightSuretyApp.updateFlightStatus(
                     config.firstAirline.airline,                    
@@ -377,20 +377,58 @@ contract('Flight Surety Tests', async (accounts) => {
             }            
             let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
             let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);
+            let afterBalance = await await web3.eth.getBalance(config.firstPassenger);                        
 
             // ASSERT
             assert.equal(beforeInsureePayout, 0);
             assert.equal(beforeAirlineFunds, ELEVEN_ETHER);
             assert.equal(afterInsureePayout, ONE_HALF_ETHER);            
             assert.equal(afterAirlineFunds, Number(ELEVEN_ETHER) - Number(ONE_HALF_ETHER));
+            
+            /* Insurance payouts are not sent directly to passenger’s wallet */
+            assert.equal(afterBalance, beforeBalance, "Insurance payouts should not be sent directly to passenger’s wallet");
         });                     
     });
 
-    // describe("Passenger withdraw", () => {        
-    //     it("Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout", async() => {
+    describe('Passenger withdraw', () => {  
+        it('Passenger cannot withdraw funds if they have not bought the insurance', async() => {
+            // ACT
+            let reverted = false;
+            let beforeBalance = await await web3.eth.getBalance(config.secondPassenger);  
+            let isInsuree = await config.flightSuretyData.isInsuree(config.secondPassenger);
+            try {                      
+                await config.flightSuretyApp.withdrawPayout({ from: config.secondPassenger, gasPrice: 0 });                
+            }
+            catch (e) {
+                reverted = true;
+            }
+            let afterBalance = await await web3.eth.getBalance(config.secondPassenger);            
 
-    //     });        
-    // });
+            // ASSERT
+            assert.equal(isInsuree, false, "Passenger should not have bought the insurance");                       
+            assert.equal(afterBalance, beforeBalance);            
+            assert.equal(reverted, true, "Passenger can only withdraw funds if the insurance is bought");
+        });           
+        
+        it('Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout', async() => {
+            // ACT            
+            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
+            let beforeBalance = await await web3.eth.getBalance(config.firstPassenger);            
+            try {                      
+                await config.flightSuretyApp.withdrawPayout({ from: config.firstPassenger, gasPrice: 0 });                
+            }
+            catch (e) {
+                console.log(e.message);
+            }
+            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
+            let afterBalance = await await web3.eth.getBalance(config.firstPassenger);            
+
+            // ASSERT
+            assert.equal(beforeInsureePayout, ONE_HALF_ETHER);            
+            assert.equal(afterInsureePayout, 0);            
+            assert.equal(Number(afterBalance), Number(beforeBalance) + Number(ONE_HALF_ETHER));            
+        });        
+    });
 
     // describe('Insurance payouts', () => {
     //     it("Insurance payouts are not sent directly to passenger’s wallet", async() => {

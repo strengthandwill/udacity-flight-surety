@@ -51,6 +51,7 @@ contract FlightSuretyData is LogHelper {
     event InsuranceBought(address indexed insuree, uint256 paid, address airline, string flight, uint256 timestamp);    
     event InsuranceCredited(address indexed insuree, uint256 payout);    
     event InsuranceCreditAvailable(address indexed airline, string indexed flight, uint256 indexed timestamp);
+    event InsurancePaid(address indexed insuree, uint256 payout);
 
     /**
      * @dev Constructor
@@ -196,7 +197,12 @@ contract FlightSuretyData is LogHelper {
      *  @dev Transfers eligible payout funds to insuree
      *
      */
-    function pay() external pure {}
+    function pay(address insuree) external {
+        uint256 payout = insurees[insuree].payout;
+        delete(insurees[insuree]);
+        insuree.transfer(payout);
+        emit InsurancePaid(insuree, payout);
+    }
 
     /**
      * @dev Initial funding for the insurance. Unless there are too many delayed flights
@@ -253,8 +259,7 @@ contract FlightSuretyData is LogHelper {
      *
      */
     function isInsuranceBought(address passenger, address airline, string flight, uint256 timestamp) public view returns (bool) {           
-        bytes32 key = getFlightKey(airline, flight, timestamp);
-        airlines[airline].funds = airlines[airline].funds.add(msg.value);
+        bytes32 key = getFlightKey(airline, flight, timestamp);        
         for (uint i=0; i < insurances[key].length; i++) {
             if (insurances[key][i].insuree == passenger) {
                 return true;
