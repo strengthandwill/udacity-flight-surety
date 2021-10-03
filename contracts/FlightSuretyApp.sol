@@ -36,9 +36,10 @@ contract FlightSuretyApp is LogHelper {
     struct Flight {
         bool isRegistered;
         uint8 statusCode;
-        uint256 timestamp;
+        uint256 updatedTimestamp;        
         address airline;   
-        string origin;
+        uint256 timestamp;
+        string origin;        
         string destination;
     }
 
@@ -184,10 +185,11 @@ contract FlightSuretyApp is LogHelper {
         flights[key] = Flight(
             true,
             0,
-            timestamp,
+            0,            
             msg.sender,
+            timestamp,
             origin,
-            destination
+            destination            
         );
 
         emit FlightRegistered(msg.sender, flight, timestamp, origin, destination);
@@ -200,7 +202,7 @@ contract FlightSuretyApp is LogHelper {
     function isFlight(address airline, string flight, uint256 timestamp) public view returns (bool) {   
         bytes32 key = getFlightKey(airline, flight, timestamp);     
         return flights[key].isRegistered;
-    }
+    }  
 
     /**
      * @dev Passenger buy insurance for a flight
@@ -219,6 +221,23 @@ contract FlightSuretyApp is LogHelper {
     }
 
     /**
+     * @dev If flight is delayed due to airline fault, passenger receives credit
+     *
+     */
+    function payoutInsurance(address airline, string flight, uint256 timestamp) 
+        external  
+        requireIsOperational {
+
+        require(isFlight(airline, flight, timestamp) == true, "Flight is not registered");
+        require(flightSuretyData.isInsuree(msg.sender) == false, "Caller is not registered insuree");
+
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        require(flights[key].statusCode == STATUS_CODE_LATE_AIRLINE, "Flight should be delayed due to airline fault for insurance payout");
+
+        flightSuretyData.creditInsurees(airline, flight, timestamp);
+    }    
+
+    /**
      * @dev Called after oracle has updated flight status
      *
      */
@@ -227,7 +246,25 @@ contract FlightSuretyApp is LogHelper {
         string memory flight,
         uint256 timestamp,
         uint8 statusCode
-    ) internal pure {}
+    ) internal {
+        bytes32 key = getFlightKey(airline, flight, timestamp);     
+        flights[key].statusCode = statusCode;
+        flights[key].updatedTimestamp = block.timestamp;
+    }
+
+    /**
+     * @dev Update flight status
+     *
+     */
+    function updateFlightStatus(
+        address airline,
+        string flight,
+        uint256 timestamp,
+        uint8 statusCode
+    ) external {
+
+        processFlightStatus(airline, flight, timestamp, statusCode);        
+    }    
 
     // Generate a request for oracles to fetch flight information
     function fetchFlightStatus(

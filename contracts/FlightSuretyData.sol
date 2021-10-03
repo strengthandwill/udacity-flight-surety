@@ -28,12 +28,19 @@ contract FlightSuretyData is LogHelper {
         address airline;
         string flight;
         uint256 timestamp;
-    }    
+    }   
+
+    struct Insuree {
+        bool isRegistered;
+        uint256 payout;
+    }
 
     mapping(address => Airline) private airlines;
     uint256 internal airlinesNum = 0;
 
     mapping(bytes32 => Insurance[]) private insurances;
+    mapping(address => Insuree) private insurees;
+    mapping(bytes32 => bool) private insuranceCredited;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -41,7 +48,9 @@ contract FlightSuretyData is LogHelper {
 
     event AirlineRegistered(address indexed airline, string name);
     event AirlineFunded(address indexed airline, uint256 funds);
-    event InsuranceBought(address insuree, uint256 paid, address airline, string flight, uint256 timestamp);
+    event InsuranceBought(address indexed insuree, uint256 paid, address airline, string flight, uint256 timestamp);    
+    event InsuranceCredited(address indexed insuree, uint256 payout);    
+    event InsuranceCreditAvailable(address indexed airline, string indexed flight, uint256 indexed timestamp);
 
     /**
      * @dev Constructor
@@ -159,14 +168,29 @@ contract FlightSuretyData is LogHelper {
             airline, 
             flight, 
             timestamp));
-        emit Log(airlines[airline].funds);
+        insurees[passenger] = Insuree(
+            true,
+            0
+        );
         emit InsuranceBought(passenger, msg.value, airline, flight, timestamp);
      }   
 
     /**
      *  @dev Credits payouts to insurees
      */
-    function creditInsurees() external pure {}
+    function creditInsurees(address airline, string flight, uint256 timestamp) external {
+        require(insuranceCredited[key] == false, "Insurance has already been credited");
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        for (uint i=0; i < insurances[key].length; i++) {
+            address insuree = insurances[key][i].insuree;
+            uint256 payout = insurances[key][i].paid * 3 / 2;
+            insurees[insuree].payout = insurees[insuree].payout.add(payout);
+            airlines[airline].funds = airlines[airline].funds.sub(payout);
+            emit InsuranceCredited(insuree, payout);                        
+        }
+        insuranceCredited[key] = true;
+        emit InsuranceCreditAvailable(airline, flight, timestamp);
+    }
 
     /**
      *  @dev Transfers eligible payout funds to insuree
@@ -237,5 +261,19 @@ contract FlightSuretyData is LogHelper {
             }
         }
         return false;
-    }  
+    }
+
+    /**
+     * @dev Indicate if the address belongs to an registered insuree or not
+     */
+    function isInsuree(address insuree) public view returns (bool) {
+        return insurees[insuree].isRegistered;
+    }     
+
+    /**
+     * @dev Get funds of the airline
+     */
+    function getInsureePayout(address insuree) public view returns (uint256) {
+        return insurees[insuree].payout;
+    } 
 }

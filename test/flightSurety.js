@@ -2,8 +2,13 @@
 var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
 
+const ONE_HALF_ETHER = web3.utils.toWei("1.5", "ether");
 const ONE_ETHER = web3.utils.toWei("1", "ether");
 const TEN_ETHER = web3.utils.toWei("10", "ether");
+const ELEVEN_ETHER = web3.utils.toWei("11", "ether");
+
+const STATUS_CODE_ON_TIME = 10;
+const STATUS_CODE_LATE_AIRLINE = 20;
 
 contract('Flight Surety Tests', async (accounts) => {
 
@@ -314,22 +319,82 @@ contract('Flight Surety Tests', async (accounts) => {
     });
 
     describe("Passenger repayment", () => {
-        it ("If flight is not delayed, passenger does not receive credit", async() => {
+        it ("If flight is not delayed due to airline fault, passenger does not receive credit", async() => {
+            // ACT
+            const ONE_HALF_ETHER = web3.utils.toWei("1.5", "ether");
+            const ELEVEN_ETHER = web3.utils.toWei("11", "ether");
 
+            let reverted = false;
+            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);            
+            let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
+            try {                              
+                await config.flightSuretyApp.updateFlightStatus(
+                    config.firstAirline.airline,                    
+                    config.firstFlight.flight, 
+                    config.firstFlight.timestamp,
+                    STATUS_CODE_ON_TIME,
+                    { from: config.firstAirline.airline });                                              
+                await config.flightSuretyApp.payoutInsurance(
+                    config.firstAirline.airline,                    
+                    config.firstFlight.flight, 
+                    config.firstFlight.timestamp,                     
+                    { from: config.firstAirline.airline });
+            }
+            catch (e) {
+                reverted = true;
+            }            
+            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
+            let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);
+
+            // ASSERT
+            assert.equal(beforeInsureePayout, 0);
+            assert.equal(beforeAirlineFunds, ELEVEN_ETHER);
+            assert.equal(afterInsureePayout, 0);            
+            assert.equal(afterAirlineFunds, ELEVEN_ETHER);
+            assert.equal(reverted, true, "Passenger can only recevie credit if flight us delayed due to airline fault");
+            
         });
 
         it ("If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid", async() => {
+            // ACT
+            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);            
+            let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
+            try {                              
+                await config.flightSuretyApp.updateFlightStatus(
+                    config.firstAirline.airline,                    
+                    config.firstFlight.flight, 
+                    config.firstFlight.timestamp,
+                    STATUS_CODE_LATE_AIRLINE,
+                    { from: config.firstAirline.airline });                                              
+                await config.flightSuretyApp.payoutInsurance(
+                    config.firstAirline.airline,                    
+                    config.firstFlight.flight, 
+                    config.firstFlight.timestamp,                     
+                    { from: config.firstAirline.airline });
+            }
+            catch (e) {
+                console.log(e.message);
+            }            
+            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
+            let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);
 
-        });
-
-        it("Insurance payouts are not sent directly to passenger’s wallet", async() => {
-
-        });           
+            // ASSERT
+            assert.equal(beforeInsureePayout, 0);
+            assert.equal(beforeAirlineFunds, ELEVEN_ETHER);
+            assert.equal(afterInsureePayout, ONE_HALF_ETHER);            
+            assert.equal(afterAirlineFunds, Number(ELEVEN_ETHER) - Number(ONE_HALF_ETHER));
+        });                     
     });
 
-    // describe("Passenger Withdraw", () => {
+    // describe("Passenger withdraw", () => {        
     //     it("Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout", async() => {
 
     //     });        
+    // });
+
+    // describe('Insurance payouts', () => {
+    //     it("Insurance payouts are not sent directly to passenger’s wallet", async() => {
+
+    //     });  
     // });
 });
