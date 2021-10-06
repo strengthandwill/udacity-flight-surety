@@ -13,8 +13,8 @@
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
         <a class="navbar-brand" href="#">FlightSurety</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
-            aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
     </nav>
@@ -23,11 +23,63 @@
 
         <div id="display-wrapper" class="top-20">
         </div>
+
+        <section>
+            <h1>Airlines</h1>            
+            <table class="table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>First Airline</td>
+                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
+                        <td>Funded</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Second Airline</td>
+                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
+                        <td>Funded</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Third Airline</td>
+                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
+                        <td>Funded</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Fourth Airline</td>
+                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
+                        <td>Registered</td>
+                        <td><btn class="btn btn-primary w-100">Fund</btn></td>
+                    </tr>         
+                    <tr>
+                        <td>Fifth Airline</td>
+                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
+                        <td>Funded</td>
+                        <td><btn class="btn btn-primary w-100">Vote</btn></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="w-100" id="airline-name" placeholder="Name"></td>
+                        <td><input type="text" class="w-100" id="airline-address" placeholder="Address"></td>
+                        <td></td>
+                        <td><btn class="btn btn-primary w-100">Add Airline</btn></td>
+                    </tr>                     
+                </tbody>                              
+            </table>            
+        </section>    
         <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+            <label class="form">Flight</label> <input type="text" id="flight-number">
+            <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
         </div>
     </main>
-
 </body>
 
 </html>
