@@ -26,7 +26,7 @@
 
         <section>
             <h1>Airlines</h1>            
-            <table class="table" style="width:100%">
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -75,6 +75,38 @@
                 </tbody>                              
             </table>            
         </section>    
+
+        <section>
+            <h1>Flights</h1>            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>Airline</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>                             
+                    <tr>
+                        <td>ND1309</td>
+                        <td>First Airlines</td>
+                        <td>Friday, Aug 20, 12PM</td>
+                        <td>Unknown</td>
+                        <td><btn class="btn btn-primary w-100">Get Status</btn></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="w-100" id="airline-name" placeholder="Number"></td>
+                        <td><input type="text" class="w-100" id="airline-address" placeholder="Airline"></td>
+                        <td><input type="text" class="w-100" id="airline-address" placeholder="Time"></td>
+                        <td></td>
+                        <td><btn class="btn btn-primary w-100">Add Flight</btn></td>
+                    </tr>                     
+                </tbody>                              
+            </table>            
+        </section>            
+
         <div class="row top-20">
             <label class="form">Flight</label> <input type="text" id="flight-number">
             <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
