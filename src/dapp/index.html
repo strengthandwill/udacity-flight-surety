@@ -20,10 +20,6 @@
     </nav>
 
     <main class="container">
-
-        <div id="display-wrapper" class="top-20">
-        </div>
-
         <section>
             <h1>Airlines</h1>            
             <table class="table">
@@ -139,12 +135,36 @@
                     </tr>                     
                 </tbody>                              
             </table>            
-        </section>            
+        </section> 
+        
+        <section>
+            <h1>Passenger</h1>            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>Amount</th>                        
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>                             
+                    <tr>
+                        <td>John Smith</td>
+                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>                        
+                        <td>1.00 ETH</td>
+                        <td><btn class="btn btn-primary w-100">Withdraw</btn></td>
+                    </tr>                                        
+                </tbody>                              
+            </table>            
+        </section>         
 
-        <div class="row top-20">
+        <!-- <div id="display-wrapper" class="top-20"></div> -->
+        
+        <!-- <div class="row top-20">
             <label class="form">Flight</label> <input type="text" id="flight-number">
             <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
-        </div>
+        </div> -->
     </main>
 </body>
 
