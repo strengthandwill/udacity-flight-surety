@@ -20,60 +20,72 @@
     </nav>
 
     <main class="container">
-        <section>
-            <h1>Airlines</h1>            
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Address</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>First Airline</td>
-                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
-                        <td>Funded</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>Second Airline</td>
-                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
-                        <td>Funded</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>Third Airline</td>
-                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
-                        <td>Funded</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>Fourth Airline</td>
-                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
-                        <td>Registered</td>
-                        <td><btn class="btn btn-primary w-100">Fund</btn></td>
-                    </tr>         
-                    <tr>
-                        <td>Fifth Airline</td>
-                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
-                        <td>Funded</td>
-                        <td><btn class="btn btn-primary w-100">Vote</btn></td>
-                    </tr>
-                    <tr>
-                        <td><input type="text" class="w-100" id="airline-name" placeholder="Name"></td>
-                        <td><input type="text" class="w-100" id="airline-address" placeholder="Address"></td>
-                        <td></td>
-                        <td><btn class="btn btn-primary w-100">Add Airline</btn></td>
-                    </tr>                     
-                </tbody>                              
-            </table>            
-        </section>    
+        <section id="airlines">
+            <h1>Airlines</h1>                
+
+            <div class="border p-3 mb-3" id="airlines-login" hidden>
+                <h5>Login Airline</h5>
+                <div class="row">
+                    <label class="col-sm-2">Name</label>
+                    <div class="col-sm-10" id="airlines-login-name"></div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">Address</label>
+                    <div class="col-sm-10" id="airlines-login-airline"></div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">Status</label>
+                    <div class="col-sm-10" id="airlines-login-isfunded"></div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">Funds</label>
+                    <div class="col-sm-10" id="airlines-login-funds"></div>
+                </div>
+            </div>
+
+            <form class="border p-3 mb-3" id="airlines-fund" hidden>
+                <h5>Add Fund</h5>
+                <div class="form-group row">
+                    <label for="airline-fund-amount" class="col-sm-2 col-form-label">Amount</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="airlines-fund-amount" value=10>
+                    </div>
+                </div>                
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary" id="airlines-fund-add">Add</button>
+                    </div>
+                </div>                
+            </form>
+
+            <form class="border p-3 mb-3" id="airlines-register" hidden>
+                <h5>Register Airline</h5>
+                <div class="form-group row">
+                    <label for="airlines-register-name" class="col-sm-2 col-form-label">Name</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="airlines-register-name" value="Second Airline">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="airlines-register-airline" class="col-sm-2 col-form-label">Address</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="airlines-register-airline" value="0xB111095D862AbDD86b3516bcD5dDA364d791b8c7">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary" id="airlines-register-register">Register</button>
+                    </div>
+                </div>
+            </form>        
+
+            <div class="border p-3 mb-3" id="airlines-error">
+                Please login with a registered Airline account.
+            </div>
+        </section>
 
         <section>
-            <h1>Flights</h1>            
+            <h1>Flights</h1>
             <table class="table">
                 <thead>
                     <tr>
@@ -84,27 +96,31 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>                             
+                <tbody>
                     <tr>
                         <td>ND1309</td>
                         <td>First Airlines</td>
                         <td>Friday, Aug 20, 12PM</td>
                         <td>Unknown</td>
-                        <td><btn class="btn btn-primary w-100">Get Status</btn></td>
+                        <td>
+                            <btn class="btn btn-primary w-100">Get Status</btn>
+                        </td>
                     </tr>
                     <tr>
                         <td><input type="text" class="w-100" id="flight-name" placeholder="Number"></td>
                         <td><input type="text" class="w-100" id="flight-airline" placeholder="Airline"></td>
                         <td><input type="text" class="w-100" id="flight-time" placeholder="Time"></td>
                         <td></td>
-                        <td><btn class="btn btn-primary w-100">Add Flight</btn></td>
-                    </tr>                     
-                </tbody>                              
-            </table>            
-        </section>   
-        
+                        <td>
+                            <btn class="btn btn-primary w-100">Add Flight</btn>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
         <section>
-            <h1>Insurance</h1>            
+            <h1>Insurance</h1>
             <table class="table">
                 <thead>
                     <tr>
@@ -116,10 +132,11 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>                             
+                <tbody>
                     <tr>
                         <td>John Smith</td>
-                        <td><ND1309/td>
+                        <td>
+                            <ND1309 /td>
                         <td>Friday, Aug 20, 12PM</td>
                         <td>First Airline</td>
                         <td>1.00 ETH</td>
@@ -131,36 +148,40 @@
                         <td><input type="text" class="w-100" id="insurance-time" placeholder="Time"></td>
                         <td><input type="text" class="w-100" id="insurance-airline" placeholder="Airline"></td>
                         <td><input type="text" class="w-100" id="insurance-amount" placeholder="Amount"></td>
-                        <td><btn class="btn btn-primary w-100">Add Flight</btn></td>
-                    </tr>                     
-                </tbody>                              
-            </table>            
-        </section> 
-        
+                        <td>
+                            <btn class="btn btn-primary w-100">Add Flight</btn>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
         <section>
-            <h1>Passenger</h1>            
+            <h1>Passenger</h1>
             <table class="table">
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Address</th>
-                        <th>Amount</th>                        
+                        <th>Amount</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>                             
+                <tbody>
                     <tr>
                         <td>John Smith</td>
-                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>                        
+                        <td>0x69e1CB5cFcA8A311586e3406ed0301C06fb839a2</td>
                         <td>1.00 ETH</td>
-                        <td><btn class="btn btn-primary w-100">Withdraw</btn></td>
-                    </tr>                                        
-                </tbody>                              
-            </table>            
-        </section>         
+                        <td>
+                            <btn class="btn btn-primary w-100">Withdraw</btn>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
         <!-- <div id="display-wrapper" class="top-20"></div> -->
-        
+
         <!-- <div class="row top-20">
             <label class="form">Flight</label> <input type="text" id="flight-number">
             <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>

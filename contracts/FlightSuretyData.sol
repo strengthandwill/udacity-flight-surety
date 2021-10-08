@@ -157,6 +157,33 @@ contract FlightSuretyData is LogHelper {
     }
 
     /**
+     * @dev Get details of airline
+     *
+     */
+    function getAirline(address _airline) external view 
+        returns (
+            string name,
+            address airline,
+            bool isRegistered,
+            bool isFunded,
+            uint256 funds) {
+
+        name = airlines[_airline].name;
+        airline = airlines[_airline].airline;
+        isRegistered = airlines[_airline].isRegistered;
+        isFunded = airlines[_airline].isFunded;
+        funds = airlines[_airline].funds;
+
+        return (
+            name,
+            airline,
+            isRegistered,
+            isFunded,
+            funds
+        );    
+    }    
+
+    /**
      * @dev Buy insurance for a flight
      *
      */

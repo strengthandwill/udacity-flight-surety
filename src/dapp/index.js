@@ -3,6 +3,8 @@ import DOM from './dom';
 import Contract from './contract';
 import './flightsurety.css';
 
+const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 
 (async() => {
 
@@ -11,21 +13,52 @@ import './flightsurety.css';
     let contract = new Contract('localhost', () => {
 
         // Read transaction
-        contract.isOperational((error, result) => {
-            console.log(error,result);
-            display('Operational Status', 'Check if contract is operational', [ { label: 'Operational Status', error: error, value: result} ]);
-        });
+        // contract.isOperational((error, result) => {
+        //     display('Operational Status', 'Check if contract is operational', [ { label: 'Operational Status', error: error, value: result} ]);
+        // });
     
+        contract.getAirline(contract.metamaskAccountID, (error, result) => {
+            if (result.airline != NULL_ADDRESS) {                                        
+                DOM.elid("airlines-login-name").innerText = result.name;
+                DOM.elid("airlines-login-airline").innerText = result.airline;
+                DOM.elid("airlines-login-isfunded").innerText = result.isFunded ? "Funded" : "Not funded";
+                DOM.elid("airlines-login-funds").innerText = `${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`;     
 
-        // User-submitted transaction
-        DOM.elid('submit-oracle').addEventListener('click', () => {
-            let flight = DOM.elid('flight-number').value;
-            // Write transaction
-            contract.fetchFlightStatus(flight, (error, result) => {
-                display('Oracles', 'Trigger oracles', [ { label: 'Fetch Flight Status', error: error, value: result.flight + ' ' + result.timestamp} ]);
+                DOM.elid("airlines-error").hidden = true;
+                DOM.elid("airlines-login").hidden = false;
+                DOM.elid("airlines-fund").hidden = false;
+                if (result.isFunded) { DOM.elid("airlines-register").hidden = false; }
+            }                        
+        });   
+        
+        DOM.elid('airlines-fund-add').addEventListener('click', () => {            
+            // Write transaction    
+            let amount = DOM.elid("airlines-fund-amount").value;
+            contract.fund(amount, (error, result) => {
+                console.log(error);
+                console.log(result);
             });
-        })
-    
+        }); 
+
+        DOM.elid('airlines-register-register').addEventListener('click', () => {            
+            // Write transaction    
+            let name = DOM.elid("airlines-register-name").value;        
+            let airline = DOM.elid("airlines-register-airline").value;
+            
+            contract.registerAirline(airline, name, (error, result) => {
+                console.log(error);
+                console.log(result);
+            });
+        }); 
+
+        // // User-submitted transaction
+        // DOM.elid('submit-oracle').addEventListener('click', () => {
+        //     let flight = DOM.elid('flight-number').value;
+        //     // Write transaction
+        //     contract.fetchFlightStatus(flight, (error, result) => {
+        //         display('Oracles', 'Trigger oracles', [ { label: 'Fetch Flight Status', error: error, value: result.flight + ' ' + result.timestamp} ]);
+        //     });
+        // });        
     });
     
 

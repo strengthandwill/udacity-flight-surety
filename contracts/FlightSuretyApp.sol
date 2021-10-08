@@ -171,6 +171,21 @@ contract FlightSuretyApp is LogHelper {
     }
 
     /**
+     * @dev Get details of airline
+     *
+     */
+    function getAirline(address _airline) external view 
+        returns (
+            string name,
+            address airline,
+            bool isRegistered,
+            bool isFunded,
+            uint256 funds) {
+
+        return flightSuretyData.getAirline(_airline);
+    }   
+
+    /**
      * @dev Register a future flight for insuring.
      *
      */
