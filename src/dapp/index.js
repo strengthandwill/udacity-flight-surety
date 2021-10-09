@@ -5,7 +5,6 @@ import './flightsurety.css';
 
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-
 (async() => {
 
     let result = null;
@@ -27,9 +26,22 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
                 DOM.elid("airlines-error").hidden = true;
                 DOM.elid("airlines-login").hidden = false;
                 DOM.elid("airlines-fund").hidden = false;
-                if (result.isFunded) { DOM.elid("airlines-register").hidden = false; }
+                if (result.isFunded) { DOM.elid("airlines-register").hidden = false; }                              
             }                        
-        });   
+        }); 
+        
+        contract.getAirlines((error, results) => {
+            let table = DOM.elid("airlines-table");
+            for (let result of results) {  
+                let tr = DOM.tr();                               
+                tr.appendChild(DOM.td(result.name));
+                tr.appendChild(DOM.td(result.airline));
+                tr.appendChild(DOM.td(result.isFunded ? "Funded" : "Not funded"));
+                tr.appendChild(DOM.td(`${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`));
+                table.appendChild(tr);
+                console.log(`Name: ${result.name}; Airline: ${result.airline}; Funded: ${result.isFunded ? "Funded" : "Not funded"}; Funds: ${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`);                           
+            }            
+        });
         
         DOM.elid('airlines-fund-add').addEventListener('click', () => {            
             // Write transaction    

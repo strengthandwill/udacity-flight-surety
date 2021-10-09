@@ -1,4 +1,5 @@
 import FlightSuretyApp from '../../build/contracts/FlightSuretyApp.json';
+import FlightSuretyData from '../../build/contracts/FlightSuretyData.json';
 import Config from './config.json';
 import Web3 from 'web3';
 
@@ -35,6 +36,7 @@ export default class Contract {
 
         this.web3 = new Web3(this.web3Provider);
         this.flightSuretyApp = new this.web3.eth.Contract(FlightSuretyApp.abi, config.appAddress);
+        this.flightSuretyData = new this.web3.eth.Contract(FlightSuretyData.abi, config.dataAddress);
 
         this.web3.eth.getAccounts((error, accts) => {
             this.metamaskAccountID = accts[0];
@@ -81,7 +83,22 @@ export default class Contract {
         self.flightSuretyApp.methods
             .getAirline(airline)
             .call({ from: self.metamaskAccountID }, callback);
-    };
+    }
+
+    getAirlines(callback) {
+        let self = this;
+        self.flightSuretyData
+            .getPastEvents('AirlineRegistered', {fromBlock: 0, toBLock: 'latest'}, (err, events) => {
+                let results = [];
+                for (let i=0; i<events.length; i++) {
+                    let airline = events[i].returnValues.airline;                
+                    self.getAirline(airline, async (error, result) => { 
+                        results.push(result);                        
+                        if (i == events.length-1) { callback(err, results); }
+                    });                         
+                }                                    
+            });        
+    }
 
     fund(amount, callback) {
         let self = this;
