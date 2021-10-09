@@ -19,71 +19,10 @@
         </button>
     </nav>
 
-    <main class="container">
-        <section id="airlines">
-            <h1>Airlines</h1>                
-
-            <div class="border p-3 mb-3" id="airlines-login" hidden>
-                <h5>Login Airline</h5>
-                <div class="row">
-                    <label class="col-sm-2">Name</label>
-                    <div class="col-sm-10" id="airlines-login-name"></div>
-                </div>
-                <div class="row">
-                    <label class="col-sm-2">Address</label>
-                    <div class="col-sm-10" id="airlines-login-airline"></div>
-                </div>
-                <div class="row">
-                    <label class="col-sm-2">Status</label>
-                    <div class="col-sm-10" id="airlines-login-isfunded"></div>
-                </div>
-                <div class="row">
-                    <label class="col-sm-2">Funds</label>
-                    <div class="col-sm-10" id="airlines-login-funds"></div>
-                </div>
-            </div>
-
-            <form class="border p-3 mb-3" id="airlines-fund" hidden>
-                <h5>Add Fund</h5>
-                <div class="form-group row">
-                    <label for="airline-fund-amount" class="col-sm-2 col-form-label">Amount</label>
-                    <div class="col-sm-10">
-                        <input type="number" class="form-control" id="airlines-fund-amount" value=10>
-                    </div>
-                </div>                
-                <div class="form-group row">
-                    <div class="col-sm-10">
-                        <button type="submit" class="btn btn-primary" id="airlines-fund-add">Add</button>
-                    </div>
-                </div>                
-            </form>
-
-            <form class="border p-3 mb-3" id="airlines-register" hidden>
-                <h5>Register Airline</h5>
-                <div class="form-group row">
-                    <label for="airlines-register-name" class="col-sm-2 col-form-label">Name</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="airlines-register-name" value="Second Airline">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="airlines-register-airline" class="col-sm-2 col-form-label">Address</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="airlines-register-airline" value="0xB111095D862AbDD86b3516bcD5dDA364d791b8c7">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-10">
-                        <button type="submit" class="btn btn-primary" id="airlines-register-register">Register</button>
-                    </div>
-                </div>
-            </form>        
-
-            <div class="border p-3 mb-3" id="airlines-error">
-                Please login with a registered Airline account.
-            </div>
-            
-            <table class="table border p-3 mb-3" id="airlines-table">
+    <main class="container">        
+        <section id="airline-login1">
+            <h1>Airlines</h1>     
+            <table class="table p-3 mb-3" id="airlines-list">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -93,6 +32,64 @@
                     </tr>
                 </thead>
             </table>            
+        </section>
+
+        <section id="airline" hidden>
+            <h1>Login Airline</h1>     
+            <div class="border p-3 mb-3" id="airline-login">                
+                <div class="row">
+                    <label class="col-sm-2">Name</label>
+                    <div class="col-sm-10" id="airline-login-name"></div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">Address</label>
+                    <div class="col-sm-10" id="airline-login-airline"></div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">Status</label>
+                    <div class="col-sm-10" id="airline-login-isfunded"></div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">Funds</label>
+                    <div class="col-sm-10" id="airline-login-funds"></div>
+                </div>
+            </div>
+
+            <form class="border p-3 mb-3" id="airline-fund">
+                <h5>Add Fund</h5>
+                <div class="form-group row">
+                    <label for="airline-fund-amount" class="col-sm-2 col-form-label">Amount</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="airline-fund-amount" value=10>
+                    </div>
+                </div>                
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary" id="airline-fund-add">Add</button>
+                    </div>
+                </div>                
+            </form>
+
+            <form class="border p-3 mb-3" id="airline-register" hidden>
+                <h5>Register Airline</h5>
+                <div class="form-group row">
+                    <label for="airline-register-name" class="col-sm-2 col-form-label">Name</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="airline-register-name" value="Second Airline">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="airline-register-airline" class="col-sm-2 col-form-label">Address</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="airline-register-airline" value="0xB111095D862AbDD86b3516bcD5dDA364d791b8c7">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary" id="airline-register-register">Register</button>
+                    </div>
+                </div>
+            </form>            
         </section>
 
         <section>

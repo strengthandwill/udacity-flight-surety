@@ -18,20 +18,18 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
     
         contract.getAirline(contract.metamaskAccountID, (error, result) => {
             if (result.airline != NULL_ADDRESS) {                                        
-                DOM.elid("airlines-login-name").innerText = result.name;
-                DOM.elid("airlines-login-airline").innerText = result.airline;
-                DOM.elid("airlines-login-isfunded").innerText = result.isFunded ? "Funded" : "Not funded";
-                DOM.elid("airlines-login-funds").innerText = `${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`;     
-
-                DOM.elid("airlines-error").hidden = true;
-                DOM.elid("airlines-login").hidden = false;
-                DOM.elid("airlines-fund").hidden = false;
-                if (result.isFunded) { DOM.elid("airlines-register").hidden = false; }                              
+                DOM.elid("airline-login-name").innerText = result.name;
+                DOM.elid("airline-login-airline").innerText = result.airline;
+                DOM.elid("airline-login-isfunded").innerText = result.isFunded ? "Funded" : "Not funded";
+                DOM.elid("airline-login-funds").innerText = `${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`;     
+                
+                DOM.elid("airline").hidden = false;                
+                if (result.isFunded) { DOM.elid("airline-register").hidden = false; }                              
             }                        
         }); 
         
         contract.getAirlines((error, results) => {
-            let table = DOM.elid("airlines-table");
+            let table = DOM.elid("airlines-list");
             for (let result of results) {  
                 let tr = DOM.tr();                               
                 tr.appendChild(DOM.td(result.name));
@@ -43,19 +41,19 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
             }            
         });
         
-        DOM.elid('airlines-fund-add').addEventListener('click', () => {            
+        DOM.elid('airline-fund-add').addEventListener('click', () => {            
             // Write transaction    
-            let amount = DOM.elid("airlines-fund-amount").value;
+            let amount = DOM.elid("airline-fund-amount").value;
             contract.fund(amount, (error, result) => {
                 console.log(error);
                 console.log(result);
             });
         }); 
 
-        DOM.elid('airlines-register-register').addEventListener('click', () => {            
+        DOM.elid('airline-register-register').addEventListener('click', () => {            
             // Write transaction    
-            let name = DOM.elid("airlines-register-name").value;        
-            let airline = DOM.elid("airlines-register-airline").value;
+            let name = DOM.elid("airline-register-name").value;        
+            let airline = DOM.elid("airline-register-airline").value;
             
             contract.registerAirline(airline, name, (error, result) => {
                 console.log(error);
