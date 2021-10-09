@@ -113,6 +113,7 @@ export default class Contract {
                 for (let i=0; i<events.length; i++) {
                     let airline = events[i].returnValues.airline;                
                     self.getAirline(airline, async (error, result) => { 
+                        result.login = result.airline == self.metamaskAccountID;
                         results.push(result);                        
                         if (i == events.length-1) { callback(error, results); }
                     });                         
