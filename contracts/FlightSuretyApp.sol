@@ -171,6 +171,13 @@ contract FlightSuretyApp is LogHelper {
     }
 
     /**
+     * @dev Indicate if the address belongs to an registered airline or not
+     */
+    function isAirline() public view returns (bool) {
+        return flightSuretyData.isAirline(msg.sender);
+    }    
+
+    /**
      * @dev Get details of airline
      *
      */

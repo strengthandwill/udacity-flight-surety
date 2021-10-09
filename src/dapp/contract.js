@@ -3,6 +3,8 @@ import FlightSuretyData from '../../build/contracts/FlightSuretyData.json';
 import Config from './config.json';
 import Web3 from 'web3';
 
+const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 export default class Contract {
     constructor(network, callback) {
         let config = Config[network];
@@ -78,12 +80,30 @@ export default class Contract {
                 });
     }
 
+    isAirline(callback) {
+        let self = this;
+        self.flightSuretyApp.methods
+            .isAirline()
+            .call({ from: self.metamaskAccountID }, callback);
+    }
+
     getAirline(airline, callback) {
         let self = this;
         self.flightSuretyApp.methods
             .getAirline(airline)
             .call({ from: self.metamaskAccountID }, callback);
     }
+
+    getAirlineActions(callback) {
+        let self = this;
+        self.flightSuretyApp.methods
+            .getAirline(self.metamaskAccountID)
+            .call({ from: self.metamaskAccountID }, (error, result) => {
+                let isAirline =  result.airline != NULL_ADDRESS;
+                let isFunded = result.isFunded;
+                callback(error, { isAirline: isAirline, isFunded: isFunded });
+            });
+    }    
 
     getAirlines(callback) {
         let self = this;
@@ -94,7 +114,7 @@ export default class Contract {
                     let airline = events[i].returnValues.airline;                
                     self.getAirline(airline, async (error, result) => { 
                         results.push(result);                        
-                        if (i == events.length-1) { callback(err, results); }
+                        if (i == events.length-1) { callback(error, results); }
                     });                         
                 }                                    
             });        

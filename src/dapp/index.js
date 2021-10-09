@@ -16,28 +16,31 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
         //     display('Operational Status', 'Check if contract is operational', [ { label: 'Operational Status', error: error, value: result} ]);
         // });
     
-        contract.getAirline(contract.metamaskAccountID, (error, result) => {
-            if (result.airline != NULL_ADDRESS) {                                        
-                DOM.elid("airline-login-name").innerText = result.name;
-                DOM.elid("airline-login-airline").innerText = result.airline;
-                DOM.elid("airline-login-isfunded").innerText = result.isFunded ? "Funded" : "Not funded";
-                DOM.elid("airline-login-funds").innerText = `${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`;     
+        contract.getAirlineActions((error, result) => {
+            console.log(result);
+            DOM.elid("airline").hidden = !result.isAirline;
+            DOM.elid("airline-register").hidden = !result.isFunded;
+
+            // if (result.airline != NULL_ADDRESS) {                                        
+            //     DOM.elid("airline-login-name").innerText = result.name;
+            //     DOM.elid("airline-login-airline").innerText = result.airline;
+            //     DOM.elid("airline-login-isfunded").innerText = result.isFunded ? "Funded" : "Not funded";
+            //     DOM.elid("airline-login-funds").innerText = `${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`;     
                 
-                DOM.elid("airline").hidden = false;                
-                if (result.isFunded) { DOM.elid("airline-register").hidden = false; }                              
-            }                        
+            //     DOM.elid("airline").hidden = false;                
+            //     if (result.isFunded) { DOM.elid("airline-register").hidden = false; }                              
+            // }                        
         }); 
         
         contract.getAirlines((error, results) => {
             let table = DOM.elid("airlines-list");
-            for (let result of results) {  
-                let tr = DOM.tr();                               
+            for (let result of results) { 
+                let tr = result.airline == contract.metamaskAccountID ? DOM.tr({className: 'text-success'}) : DOM.tr();
                 tr.appendChild(DOM.td(result.name));
                 tr.appendChild(DOM.td(result.airline));
                 tr.appendChild(DOM.td(result.isFunded ? "Funded" : "Not funded"));
                 tr.appendChild(DOM.td(`${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`));
-                table.appendChild(tr);
-                console.log(`Name: ${result.name}; Airline: ${result.airline}; Funded: ${result.isFunded ? "Funded" : "Not funded"}; Funds: ${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`);                           
+                table.appendChild(tr);                
             }            
         });
         
