@@ -19,8 +19,10 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
         checkLoginAccount(contract);
 
         loadAirlines(contract);
-        setTimeout(() => {  loadFlights(contract) }, 100);        
-        setTimeout(() => {  loadInsurances(contract) }, 200);
+        loadFlights(contract);
+        loadInsurances(contract);
+        // setTimeout(() => {  loadFlights(contract) }, 100);        
+        // setTimeout(() => {  loadInsurances(contract) }, 200);
 
         loadAirlineActions(contract);   
         loadFlightActions(contract);
@@ -135,7 +137,7 @@ function loadInsuranceActions(contract) {
 
 function loadInsurances(contract) {
     contract.getInsurances(() => {
-        let table = DOM.elid("insurances-list");
+        let insurancesTable = DOM.elid("insurances-list");
         for (let insurance of contract.insurances) { 
             let tr = insurance.login ? DOM.tr({className: 'text-success'}) : DOM.tr();
             tr.appendChild(DOM.td(insurance.insuree_name));
@@ -145,10 +147,26 @@ function loadInsurances(contract) {
             tr.appendChild(DOM.td(insurance.origin));
             tr.appendChild(DOM.td(insurance.destination));
             tr.appendChild(DOM.td(`${insurance.paid} ETH`));
-            table.appendChild(tr);                
+            insurancesTable.appendChild(tr);                
+        }
+
+        let insureesTable = DOM.elid("insurees-list");
+        for (let i=0; i<contract.insurees.length; i++) {            
+            let tr = contract.insurees[i].login ? DOM.tr({className: 'text-success'}) : DOM.tr();
+            tr.appendChild(DOM.td(contract.insurees[i].name));
+            tr.appendChild(DOM.td(contract.insurees[i].insuree));         
+            tr.appendChild(DOM.td(`${contract.insurees[i].payout} ETH`));
+
+            if (contract.insurees[i].login) {
+                let actionsTd = DOM.td();                        
+                actionsTd.appendChild(DOM.button({className: 'btn btn-primary mr-3', value: i.toString()}, 'Widthdraw'));                            
+                tr.appendChild(actionsTd);
+            }
+            
+            insureesTable.appendChild(tr);
         }
     });
-}
+}    
 
 function display(title, description, results) {
     let displayDiv = DOM.elid("display-wrapper");

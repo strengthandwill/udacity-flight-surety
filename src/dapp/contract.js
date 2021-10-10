@@ -17,6 +17,7 @@ export default class Contract {
         this.airlines = [];
         this.flights = [];        
         this.insurances = [];
+        this.insurees = [];
         
         this.loginAccount = null;
         this.isAirline = false;
@@ -245,27 +246,48 @@ export default class Contract {
         return null;
     }
 
+    getInsuree(insuree, callback) {
+        let self = this;
+        self.flightSuretyApp.methods
+            .getInsuree(insuree)
+            .call({ from: self.loginAccount }, callback);
+    }    
+
     getInsurances(callback) {
         let self = this;
         self.flightSuretyData
             .getPastEvents('InsuranceBought', {fromBlock: 0, toBLock: 'latest'}, (error, events) => {                                
                 for (let i=0; i<events.length; i++) {
-                    let flightInfo = self.getFlightInfo(events[i].returnValues.airline, events[i].returnValues.flight, events[i].returnValues.timestamp);
-                    console.log(flightInfo);
-                    
-                    self.insurances.push({
-                        login: self.loginAccount == events[i].returnValues.passenger,
-                        insuree: events[i].returnValues.passenger,
-                        insuree_name: "insuree_name",                            
-                        paid: self.web3.utils.fromWei(events[i].returnValues.paid, 'ether'),
-                        airline: events[i].returnValues.airline,
-                        airline_name: this.getAirlineName(events[i].returnValues.airline),
-                        flight: events[i].returnValues.flight,
-                        timestamp: events[i].returnValues.timestamp,
-                        origin: flightInfo.origin,
-                        destination: flightInfo.destination                           
-                    });                        
-                    if (i == events.length-1) { callback(); }                                        
+                    let insuree = events[i].returnValues.insuree;
+                    console.log(insuree);
+                    self.getInsuree(insuree, async (error, result) => {                                                                        
+                        self.insurees.push({
+                            login: self.loginAccount == insuree,
+                            insuree: insuree,
+                            name: result.name,
+                            isRegistered: result.isRegistered,
+                            payout: result.payout,
+                        });
+
+                        let airline = events[i].returnValues.airline;
+                        let flight = events[i].returnValues.flight;
+                        let timestamp = events[i].returnValues.timestamp;
+                        let flightInfo = self.getFlightInfo(airline, flight, timestamp);
+                        self.insurances.push({
+                            login: self.loginAccount == insuree,
+                            insuree: insuree,
+                            insuree_name: result.name,                            
+                            paid: self.web3.utils.fromWei(events[i].returnValues.paid, 'ether'),
+                            airline: airline,
+                            airline_name: this.getAirlineName(airline),
+                            flight: flight,
+                            timestamp: timestamp,
+                            origin: flightInfo.origin,
+                            destination: flightInfo.destination                           
+                        });  
+                                                                  
+                        if (i == events.length-1) { callback(); }                                        
+                    });
                 }                                    
             });        
     }

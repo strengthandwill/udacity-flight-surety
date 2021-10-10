@@ -252,6 +252,18 @@ contract FlightSuretyApp is LogHelper {
     }
 
     /**
+     * @dev Get funds of the airline
+     */
+    function getInsuree(address insuree) public view 
+        returns (        
+            string name,
+            bool isRegistered,
+            uint256 payout) {
+
+        return flightSuretyData.getInsuree(insuree);                
+    } 
+
+    /**
      * @dev If flight is delayed due to airline fault, passenger receives credit
      *
      */

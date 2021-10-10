@@ -310,4 +310,24 @@ contract FlightSuretyData is LogHelper {
     function getInsureePayout(address insuree) public view returns (uint256) {
         return insurees[insuree].payout;
     } 
+
+    /**
+     * @dev Get funds of the airline
+     */
+    function getInsuree(address insuree) public view 
+        returns (        
+            string name,
+            bool isRegistered,
+            uint256 payout) {
+
+        name = insurees[insuree].name;
+        isRegistered = insurees[insuree].isRegistered;
+        payout = insurees[insuree].payout;
+
+        return (
+            name,
+            isRegistered,
+            payout
+        );
+    } 
 }
