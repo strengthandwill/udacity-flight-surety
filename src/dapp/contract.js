@@ -4,6 +4,12 @@ import Config from './config.json';
 import Web3 from 'web3';
 
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
+const STATUS_CODE_UNKNOWN = 0;
+const STATUS_CODE_ON_TIME = 10;
+const STATUS_CODE_LATE_AIRLINE = 20;
+const STATUS_CODE_LATE_WEATHER = 30;
+const STATUS_CODE_LATE_TECHNICAL = 40;
+const STATUS_CODE_LATE_OTHER = 50;
 
 export default class Contract {
     constructor(network, callback) {
@@ -103,20 +109,27 @@ export default class Contract {
                 let results = [];
                 for (let i=0; i<events.length; i++) {
                     let airline = events[i].returnValues.airline;                
-                    self.getAirline(airline, async (error, result) => { 
-                        result.login = result.airline == self.loginAccount;
-                        results.push(result);                        
+                    self.getAirline(airline, async (error, result) => {           
                         self.airlines.push({
                             login: self.loginAccount == result.airline,
                             name: result.name,                            
                             airline: result.airline,
                             isFunded: result.isFunded ? "Funded" : "Not funded",
-                            funds: `${self.web3.utils.fromWei(result.funds, 'ether')} ETH`                            
+                            funds: self.web3.utils.fromWei(result.funds, 'ether')
                         });                        
                         if (i == events.length-1) { callback(); }
                     });                         
                 }                                    
             });        
+    }
+
+    getAirlineName(address) {
+        for (let airline of this.airlines) {
+            if (airline.airline == address) {
+                return airline.name;
+            }
+        }
+        return null;
     }
 
     fund(amount, callback) {
@@ -147,15 +160,18 @@ export default class Contract {
         self.flightSuretyApp
             .getPastEvents('FlightRegistered', {fromBlock: 0, toBLock: 'latest'}, (error, events) => {
                 for (let i=0; i<events.length; i++) {                    
-                    let airline = events[i].returnValues.airline;                
-                    self.getAirline(airline, async (error, result) => {                                                
+                    let airline = events[i].returnValues.airline;
+                    let flight = events[i].returnValues.flight;
+                    let timestamp = events[i].returnValues.timestamp;
+                    self.getFlightStatus(airline, flight, timestamp, async (error, result) => {                                                
                         self.flights.push({
-                            airline: result.airline,
-                            airline_name: result.name,
-                            flight: events[i].returnValues.flight,
-                            timestamp: events[i].returnValues.timestamp,
+                            airline: airline,
+                            airline_name: self.getAirlineName(airline),
+                            flight: flight,
+                            timestamp: timestamp,
                             origin: events[i].returnValues.origin,
-                            destination: events[i].returnValues.destination
+                            destination: events[i].returnValues.destination,
+                            status: self.getFlightStatusDesc(result.statusCode)
                         });
                         if (i == events.length-1) { callback(); }
                     });                         
@@ -175,4 +191,36 @@ export default class Contract {
                 callback(error, result);
             });
     };
+
+    getFlightStatus(airline, flight, timestamp, callback) {
+        let self = this;
+        self.flightSuretyApp.methods
+            .getFlightStatus(airline, flight, timestamp)
+            .call({ from: self.loginAccount }, callback);
+    } 
+    
+    getFlightStatusDesc(statusCode) {
+        let status = "Unknown";
+        switch (statusCode) {
+            case STATUS_CODE_UNKNOWN: 
+                status = "Unknown";
+                break;
+            case STATUS_CODE_ON_TIME:
+                status = "On Time";
+                break;            
+            case STATUS_CODE_LATE_AIRLINE:
+                status = "Late due to Airline";
+                break;            
+            case STATUS_CODE_LATE_WEATHER:
+                status = "Late due to Weather";
+                break;            
+            case STATUS_CODE_LATE_TECHNICAL:
+                status = "Late due to Technical";
+                break;            
+            case STATUS_CODE_LATE_OTHER:
+                status = "Late due to Other";
+                break;            
+        }
+        return status;
+    }
 }

@@ -42,7 +42,7 @@ function loadAirlines(contract) {
             tr.appendChild(DOM.td(airline.name));
             tr.appendChild(DOM.td(airline.airline));
             tr.appendChild(DOM.td(airline.isFunded));
-            tr.appendChild(DOM.td(airline.funds));
+            tr.appendChild(DOM.td(`${airline.funds} ETH`));
             table.appendChild(tr);                
         }
         // loadAirlinesOptions(contract.airlines);            
@@ -81,15 +81,19 @@ function loadAirlineActions(contract) {
 function loadFlights(contract) {
     contract.getFlights(() => {
         let table = DOM.elid("flights-list");
-        for (let flight of contract.flights) { 
+        for (let i=0; i<contract.flights.length; i++) { 
             let tr = DOM.tr();
-            tr.appendChild(DOM.td(flight.airline_name));
-            tr.appendChild(DOM.td(flight.flight));
-            tr.appendChild(DOM.td(flight.timestamp));        
-            tr.appendChild(DOM.td(flight.origin));
-            tr.appendChild(DOM.td(flight.destination));
-            tr.appendChild(DOM.td());
-            tr.appendChild(DOM.td());
+            tr.appendChild(DOM.td(contract.flights[i].airline_name));
+            tr.appendChild(DOM.td(contract.flights[i].flight));
+            tr.appendChild(DOM.td(contract.flights[i].timestamp));        
+            tr.appendChild(DOM.td(contract.flights[i].origin));
+            tr.appendChild(DOM.td(contract.flights[i].destination));
+            tr.appendChild(DOM.td(contract.flights[i].status));
+            
+            let actionsTd = DOM.td();
+            actionsTd.appendChild(DOM.button({className: 'btn btn-primary', value: i.toString()}, 'Check Status'));
+            tr.appendChild(actionsTd); 
+
             table.appendChild(tr);                
         }
     });
