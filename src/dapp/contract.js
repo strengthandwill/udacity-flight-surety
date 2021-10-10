@@ -16,6 +16,7 @@ export default class Contract {
         let config = Config[network];
         this.airlines = [];
         this.flights = [];        
+        this.insurances = [];
         
         this.loginAccount = null;
         this.isAirline = false;
@@ -106,7 +107,6 @@ export default class Contract {
         let self = this;
         self.flightSuretyData
             .getPastEvents('AirlineRegistered', {fromBlock: 0, toBLock: 'latest'}, (error, events) => {
-                let results = [];
                 for (let i=0; i<events.length; i++) {
                     let airline = events[i].returnValues.airline;                
                     self.getAirline(airline, async (error, result) => {           
@@ -180,14 +180,12 @@ export default class Contract {
     }   
     
     registerFlight(flight, timestamp, origin, destination, name, callback) {
-        console.log(flight);
         let self = this;    
         self.flightSuretyApp.methods
             .registerFlight(flight, timestamp, origin, destination)
             .send({ 
-                from: self.loginAccount,
+                from: self.loginAccount
             }, (error, result) => {
-                alert(error);
                 callback(error, result);
             });
     };
@@ -197,7 +195,7 @@ export default class Contract {
         self.flightSuretyApp.methods
             .getFlightStatus(airline, flight, timestamp)
             .call({ from: self.loginAccount }, callback);
-    } 
+    }
     
     getFlightStatusDesc(statusCode) {
         let status = "Unknown";
@@ -222,5 +220,53 @@ export default class Contract {
                 break;            
         }
         return status;
+    }
+
+    buyInsurance(name, airline, flight, timestamp, amount, callback) {
+        let self = this;    
+        self.flightSuretyApp.methods
+            .buyInsurance(name, airline, flight, timestamp)
+            .send({ 
+                from: self.loginAccount,
+                value: this.web3.utils.toWei(amount, 'ether')
+            }, (error, result) => {
+                alert(error);
+                callback(error, result);
+            });
+    };
+
+    getFlightInfo(airline, flight, timestamp) {
+        for (let flightEle of this.flights) {            
+            if (flightEle.airline == airline && flightEle.flight == flight && flightEle.timestamp == timestamp) {
+                return { origin: flightEle.origin, destination: flightEle.destination };
+            }
+        }
+        console.log("hello2");
+        return null;
+    }
+
+    getInsurances(callback) {
+        let self = this;
+        self.flightSuretyData
+            .getPastEvents('InsuranceBought', {fromBlock: 0, toBLock: 'latest'}, (error, events) => {                                
+                for (let i=0; i<events.length; i++) {
+                    let flightInfo = self.getFlightInfo(events[i].returnValues.airline, events[i].returnValues.flight, events[i].returnValues.timestamp);
+                    console.log(flightInfo);
+                    
+                    self.insurances.push({
+                        login: self.loginAccount == events[i].returnValues.passenger,
+                        insuree: events[i].returnValues.passenger,
+                        insuree_name: "insuree_name",                            
+                        paid: self.web3.utils.fromWei(events[i].returnValues.paid, 'ether'),
+                        airline: events[i].returnValues.airline,
+                        airline_name: this.getAirlineName(events[i].returnValues.airline),
+                        flight: events[i].returnValues.flight,
+                        timestamp: events[i].returnValues.timestamp,
+                        origin: flightInfo.origin,
+                        destination: flightInfo.destination                           
+                    });                        
+                    if (i == events.length-1) { callback(); }                                        
+                }                                    
+            });        
     }
 }

@@ -19,10 +19,12 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
         checkLoginAccount(contract);
 
         loadAirlines(contract);
-        loadAirlineActions(contract);                    
-        
-        loadFlights(contract);
+        setTimeout(() => {  loadFlights(contract) }, 100);        
+        setTimeout(() => {  loadInsurances(contract) }, 200);
+
+        loadAirlineActions(contract);   
         loadFlightActions(contract);
+        loadInsuranceActions(contract);
     });    
 })();
 
@@ -45,7 +47,6 @@ function loadAirlines(contract) {
             tr.appendChild(DOM.td(`${airline.funds} ETH`));
             table.appendChild(tr);                
         }
-        // loadAirlinesOptions(contract.airlines);            
     });
 }
 
@@ -70,13 +71,6 @@ function loadAirlineActions(contract) {
         });
     });    
 }
-
-// function loadAirlinesOptions(airlines) {
-//     let select = DOM.elid("flight-register-airline");
-//     for (let airline of airlines) {
-//         select.appendChild(DOM.option({value: airline.airline}, airline.name));                
-//     } 
-// }
 
 function loadFlights(contract) {
     contract.getFlights(() => {
@@ -124,6 +118,38 @@ function loadFlightActions(contract) {
     });    
 }
 
+function loadInsuranceActions(contract) {
+    DOM.elid('insurance-buy-submit').addEventListener('click', () => {                            
+        let name = DOM.elid("insurance-buy-name").value;        
+        let i = DOM.elid("insurance-buy-flight-id").value;
+        let airline = contract.flights[i].airline;
+        let flight = contract.flights[i].flight;
+        let timestamp = contract.flights[i].timestamp;
+        let amount = DOM.elid("insurance-buy-amount").value;
+        contract.buyInsurance(name, airline, flight, timestamp, amount, (error, result) => {
+            console.log(error);
+            console.log(result);
+        });
+    });    
+}
+
+function loadInsurances(contract) {
+    contract.getInsurances(() => {
+        let table = DOM.elid("insurances-list");
+        for (let insurance of contract.insurances) { 
+            let tr = insurance.login ? DOM.tr({className: 'text-success'}) : DOM.tr();
+            tr.appendChild(DOM.td(insurance.insuree_name));
+            tr.appendChild(DOM.td(insurance.airline_name));
+            tr.appendChild(DOM.td(insurance.flight));
+            tr.appendChild(DOM.td(insurance.timestamp));
+            tr.appendChild(DOM.td(insurance.origin));
+            tr.appendChild(DOM.td(insurance.destination));
+            tr.appendChild(DOM.td(`${insurance.paid} ETH`));
+            table.appendChild(tr);                
+        }
+    });
+}
+
 function display(title, description, results) {
     let displayDiv = DOM.elid("display-wrapper");
     let section = DOM.section();
@@ -136,7 +162,6 @@ function display(title, description, results) {
         section.appendChild(row);
     })
     displayDiv.append(section);
-
 }
 
 

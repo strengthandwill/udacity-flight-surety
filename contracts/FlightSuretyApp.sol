@@ -248,7 +248,7 @@ contract FlightSuretyApp is LogHelper {
         require(msg.value > 0, "Value sent must be greater than 0");
         require(msg.value <= MAX_INSURANCE_COST, "Value sent exceeded the maximum allowed");
         require(isFlight(airline, flight, timestamp) == true, "Flight is not registered");
-        flightSuretyData.buy.value(msg.value)(name, msg.sender, airline, flight, timestamp);
+        flightSuretyData.buy.value(msg.value)(msg.sender, name, airline, flight, timestamp);
     }
 
     /**
