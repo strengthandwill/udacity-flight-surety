@@ -14,25 +14,35 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
         // Read transaction
         // contract.isOperational((error, result) => {
         //     display('Operational Status', 'Check if contract is operational', [ { label: 'Operational Status', error: error, value: result} ]);
-        // });    
-        
+        // }); 
+
+        checkLoginAccount(contract);
+
         loadAirlines(contract);
-        loadAirlineActions(contract);  
+        loadAirlineActions(contract);                    
         
         loadFlights(contract);
         loadFlightActions(contract);
     });    
 })();
 
+function checkLoginAccount(contract) {
+    contract.checkLoginAirline(() => {
+        DOM.elid("airline").hidden = !contract.isAirline;
+        DOM.elid("airline-register").hidden = !contract.isAirlineFunded;
+        DOM.elid("flight-register").hidden = !contract.isAirline;
+    }); 
+}
+
 function loadAirlines(contract) {
-    contract.getAirlines((error, results) => {
+    contract.getAirlines(() => {
         let table = DOM.elid("airlines-list");
-        for (let result of results) { 
-            let tr = result.login ? DOM.tr({className: 'text-success'}) : DOM.tr();
-            tr.appendChild(DOM.td(result.name));
-            tr.appendChild(DOM.td(result.airline));
-            tr.appendChild(DOM.td(result.isFunded ? "Funded" : "Not funded"));
-            tr.appendChild(DOM.td(`${contract.web3.utils.fromWei(result.funds, 'ether')} ETH`));
+        for (let airline of contract.airlines) { 
+            let tr = airline.login ? DOM.tr({className: 'text-success'}) : DOM.tr();
+            tr.appendChild(DOM.td(airline.name));
+            tr.appendChild(DOM.td(airline.airline));
+            tr.appendChild(DOM.td(airline.isFunded));
+            tr.appendChild(DOM.td(airline.funds));
             table.appendChild(tr);                
         }
         // loadAirlinesOptions(contract.airlines);            
@@ -40,11 +50,6 @@ function loadAirlines(contract) {
 }
 
 function loadAirlineActions(contract) {
-    contract.getAirlineActions((error, result) => {
-        DOM.elid("airline").hidden = !result.isAirline;
-        DOM.elid("airline-register").hidden = !result.isFunded;                             
-    }); 
-    
     DOM.elid('airline-fund-add').addEventListener('click', () => {            
         // Write transaction    
         let amount = DOM.elid("airline-fund-amount").value;
@@ -54,7 +59,7 @@ function loadAirlineActions(contract) {
         });
     }); 
 
-    DOM.elid('airline-register-register').addEventListener('click', () => {            
+    DOM.elid('airline-register-submit').addEventListener('click', () => {            
         // Write transaction    
         let name = DOM.elid("airline-register-name").value;        
         let airline = DOM.elid("airline-register-airline").value;
@@ -74,7 +79,7 @@ function loadAirlineActions(contract) {
 // }
 
 function loadFlights(contract) {
-    contract.getFlights((error, results) => {
+    contract.getFlights(() => {
         let table = DOM.elid("flights-list");
         for (let flight of contract.flights) { 
             let tr = DOM.tr();

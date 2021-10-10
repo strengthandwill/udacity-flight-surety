@@ -8,10 +8,13 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export default class Contract {
     constructor(network, callback) {
         let config = Config[network];
-        // this.owner = null;
         this.airlines = [];
-        this.flights = [];
-        // this.passengers = [];
+        this.flights = [];        
+        
+        this.loginAccount = null;
+        this.isAirline = false;
+        this.isAirlineFunded = false;
+
         this.initialize(config, callback);
     }
 
@@ -42,20 +45,7 @@ export default class Contract {
         this.flightSuretyData = new this.web3.eth.Contract(FlightSuretyData.abi, config.dataAddress);
 
         this.web3.eth.getAccounts((error, accts) => {
-            this.metamaskAccountID = accts[0];
-           
-            this.owner = accts[0];
-
-            // let counter = 1;
-            
-            // while(this.airlines.length < 5) {
-            //     this.airlines.push(accts[counter++]);
-            // }
-
-            // while(this.passengers.length < 5) {
-            //     this.passengers.push(accts[counter++]);
-            // }
-
+            this.loginAccount = accts[0];
             callback();
         });
     }
@@ -85,24 +75,24 @@ export default class Contract {
         let self = this;
         self.flightSuretyApp.methods
             .isAirline()
-            .call({ from: self.metamaskAccountID }, callback);
+            .call({ from: self.loginAccount }, callback);
     }
 
     getAirline(airline, callback) {
         let self = this;
         self.flightSuretyApp.methods
             .getAirline(airline)
-            .call({ from: self.metamaskAccountID }, callback);
+            .call({ from: self.loginAccount }, callback);
     }
 
-    getAirlineActions(callback) {
+    checkLoginAirline(callback) {
         let self = this;
         self.flightSuretyApp.methods
-            .getAirline(self.metamaskAccountID)
-            .call({ from: self.metamaskAccountID }, (error, result) => {
-                let isAirline =  result.airline != NULL_ADDRESS;
-                let isFunded = result.isFunded;
-                callback(error, { isAirline: isAirline, isFunded: isFunded });
+            .getAirline(self.loginAccount)
+            .call({ from: self.loginAccount }, (error, result) => {
+                self.isAirline = result.airline != NULL_ADDRESS;
+                self.isAirlineFunded = result.isFunded;
+                callback();
             });
     }    
 
@@ -114,13 +104,16 @@ export default class Contract {
                 for (let i=0; i<events.length; i++) {
                     let airline = events[i].returnValues.airline;                
                     self.getAirline(airline, async (error, result) => { 
-                        result.login = result.airline == self.metamaskAccountID;
+                        result.login = result.airline == self.loginAccount;
                         results.push(result);                        
                         self.airlines.push({
+                            login: self.loginAccount == result.airline,
                             name: result.name,                            
-                            airline: result.airline
-                        });
-                        if (i == events.length-1) { callback(error, results); }
+                            airline: result.airline,
+                            isFunded: result.isFunded ? "Funded" : "Not funded",
+                            funds: `${self.web3.utils.fromWei(result.funds, 'ether')} ETH`                            
+                        });                        
+                        if (i == events.length-1) { callback(); }
                     });                         
                 }                                    
             });        
@@ -131,7 +124,7 @@ export default class Contract {
         self.flightSuretyApp.methods
             .fund()
             .send({ 
-                from: self.metamaskAccountID,
+                from: self.loginAccount,
                 value: this.web3.utils.toWei(amount, 'ether')
             }, (error, result) => {
                 callback(error, result);
@@ -143,7 +136,7 @@ export default class Contract {
         self.flightSuretyApp.methods
             .registerAirline(airline, name)
             .send({ 
-                from: self.metamaskAccountID,
+                from: self.loginAccount,
             }, (error, result) => {
                 callback(error, result);
             });
@@ -153,7 +146,6 @@ export default class Contract {
         let self = this;
         self.flightSuretyApp
             .getPastEvents('FlightRegistered', {fromBlock: 0, toBLock: 'latest'}, (error, events) => {
-                console.log(events);
                 for (let i=0; i<events.length; i++) {                    
                     let airline = events[i].returnValues.airline;                
                     self.getAirline(airline, async (error, result) => {                                                
@@ -165,7 +157,7 @@ export default class Contract {
                             origin: events[i].returnValues.origin,
                             destination: events[i].returnValues.destination
                         });
-                        if (i == events.length-1) { callback(error, self.flights); }
+                        if (i == events.length-1) { callback(); }
                     });                         
                 }                                    
             });        
@@ -177,7 +169,7 @@ export default class Contract {
         self.flightSuretyApp.methods
             .registerFlight(flight, timestamp, origin, destination)
             .send({ 
-                from: self.metamaskAccountID,
+                from: self.loginAccount,
             }, (error, result) => {
                 alert(error);
                 callback(error, result);
