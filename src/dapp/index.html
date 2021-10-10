@@ -75,37 +75,60 @@
 
         <section>
             <h1>Flights</h1>
-            <table class="table">
+            <table class="table" id="flights-list">
                 <thead>
-                    <tr>
-                        <th>Number</th>
+                    <tr>                        
                         <th>Airline</th>
+                        <th>Flight</th>
                         <th>Time</th>
+                        <th>Origin</th>
+                        <th>Destination</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>ND1309</td>
-                        <td>First Airlines</td>
-                        <td>Friday, Aug 20, 12PM</td>
-                        <td>Unknown</td>
-                        <td>
-                            <btn class="btn btn-primary w-100">Get Status</btn>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="text" class="w-100" id="flight-name" placeholder="Number"></td>
-                        <td><input type="text" class="w-100" id="flight-airline" placeholder="Airline"></td>
-                        <td><input type="text" class="w-100" id="flight-time" placeholder="Time"></td>
-                        <td></td>
-                        <td>
-                            <btn class="btn btn-primary w-100">Add Flight</btn>
-                        </td>
-                    </tr>
+                <tbody>                                       
                 </tbody>
             </table>
+
+            <form class="border p-3 mb-3" id="flight-register">
+                <h5>Register Flight</h5>
+                <!-- <div class="form-group row">
+                    <label for="flight-register-airline" class="col-sm-2 col-form-label">Airline</label>
+                    <div class="col-sm-10">
+                        <select class="form-select form-control" aria-label=".form-select-lg example" id="flight-register-airline"></select>
+                    </div>
+                </div>                                 -->
+                <div class="form-group row">
+                    <label for="flight-register-flight" class="col-sm-2 col-form-label">Number</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="flight-register-flight" value="ND1309">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="flight-register-timestamp" class="col-sm-2 col-form-label">Time</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="flight-register-timestamp" value="12345678">
+                    </div>
+                </div>                
+                <div class="form-group row">
+                    <label for="flight-register-origin" class="col-sm-2 col-form-label">Origin</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="flight-register-origin" value="Singapore">
+                    </div>
+                </div>                
+                <div class="form-group row">
+                    <label for="flight-register-destination" class="col-sm-2 col-form-label">Destination</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="flight-register-destination" value="Hong Kong">
+                    </div>
+                </div>                                                
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary" id="flight-register-submit">Register</button>
+                    </div>
+                </div>
+            </form>
         </section>
 
         <section>

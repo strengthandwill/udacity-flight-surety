@@ -9,7 +9,8 @@ export default class Contract {
     constructor(network, callback) {
         let config = Config[network];
         // this.owner = null;
-        // this.airlines = [];
+        this.airlines = [];
+        this.flights = [];
         // this.passengers = [];
         this.initialize(config, callback);
     }
@@ -108,13 +109,17 @@ export default class Contract {
     getAirlines(callback) {
         let self = this;
         self.flightSuretyData
-            .getPastEvents('AirlineRegistered', {fromBlock: 0, toBLock: 'latest'}, (err, events) => {
+            .getPastEvents('AirlineRegistered', {fromBlock: 0, toBLock: 'latest'}, (error, events) => {
                 let results = [];
                 for (let i=0; i<events.length; i++) {
                     let airline = events[i].returnValues.airline;                
                     self.getAirline(airline, async (error, result) => { 
                         result.login = result.airline == self.metamaskAccountID;
                         results.push(result);                        
+                        self.airlines.push({
+                            name: result.name,                            
+                            airline: result.airline
+                        });
                         if (i == events.length-1) { callback(error, results); }
                     });                         
                 }                                    
@@ -140,6 +145,41 @@ export default class Contract {
             .send({ 
                 from: self.metamaskAccountID,
             }, (error, result) => {
+                callback(error, result);
+            });
+    };
+
+    getFlights(callback) {
+        let self = this;
+        self.flightSuretyApp
+            .getPastEvents('FlightRegistered', {fromBlock: 0, toBLock: 'latest'}, (error, events) => {
+                console.log(events);
+                for (let i=0; i<events.length; i++) {                    
+                    let airline = events[i].returnValues.airline;                
+                    self.getAirline(airline, async (error, result) => {                                                
+                        self.flights.push({
+                            airline: result.airline,
+                            airline_name: result.name,
+                            flight: events[i].returnValues.flight,
+                            timestamp: events[i].returnValues.timestamp,
+                            origin: events[i].returnValues.origin,
+                            destination: events[i].returnValues.destination
+                        });
+                        if (i == events.length-1) { callback(error, self.flights); }
+                    });                         
+                }                                    
+            });        
+    }   
+    
+    registerFlight(flight, timestamp, origin, destination, name, callback) {
+        console.log(flight);
+        let self = this;    
+        self.flightSuretyApp.methods
+            .registerFlight(flight, timestamp, origin, destination)
+            .send({ 
+                from: self.metamaskAccountID,
+            }, (error, result) => {
+                alert(error);
                 callback(error, result);
             });
     };

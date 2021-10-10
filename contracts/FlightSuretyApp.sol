@@ -389,9 +389,9 @@ contract FlightSuretyApp is LogHelper {
 
     // Event fired when new flight is registered
     event FlightRegistered(
-        address indexed airline,
-        string indexed flight,
-        uint256 indexed timestamp,
+        address airline,
+        string flight,
+        uint256 timestamp,
         string origin,
         string destination
     );
