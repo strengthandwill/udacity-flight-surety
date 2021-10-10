@@ -31,6 +31,7 @@ contract FlightSuretyData is LogHelper {
     }   
 
     struct Insuree {
+        string name;
         bool isRegistered;
         uint256 payout;
     }
@@ -187,7 +188,7 @@ contract FlightSuretyData is LogHelper {
      * @dev Buy insurance for a flight
      *
      */
-    function buy(address passenger, address airline, string flight, uint256 timestamp) external payable {
+    function buy(address passenger, string name, address airline, string flight, uint256 timestamp) external payable {
         bytes32 key = getFlightKey(airline, flight, timestamp);
         airlines[airline].funds = airlines[airline].funds.add(msg.value);
         insurances[key].push(Insurance(
@@ -197,6 +198,7 @@ contract FlightSuretyData is LogHelper {
             flight, 
             timestamp));
         insurees[passenger] = Insuree(
+            name,
             true,
             0
         );

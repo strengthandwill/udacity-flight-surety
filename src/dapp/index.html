@@ -127,8 +127,8 @@
         </section>
 
         <section>
-            <h1>Insurance</h1>
-            <table class="table">
+            <h1>Insurances</h1>
+            <table class="table" id="insurances">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -171,6 +171,36 @@
                 </tbody>
             </table>
         </section>
+
+        <section id="insurance">
+            <form class="border p-3 mb-3" id="insurance-buy" hidden>
+                <h5>Buy Insurance</h5>                
+                <div class="form-group row">
+                    <label for="insurance-buy-flight" class="col-sm-2 col-form-label">Flight</label>
+                    <div class="col-sm-10">
+                        <span id="insurance-buy-flight"></span>
+                        <input type="text" class="form-control" id="insurance-buy-flight-id" hidden>
+                    </div>  
+                </div>
+                <div class="form-group row">
+                    <label for="insurance-buy-name" class="col-sm-2 col-form-label">Name</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="insurance-buy-name" value="John Smith">
+                    </div>  
+                </div>      
+                <div class="form-group row">
+                    <label for="insurance-buy-paid" class="col-sm-2 col-form-label">Amount</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="insurance-buy-paid" value="1.0">
+                    </div>  
+                </div>                              
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button type="submit" class="btn btn-primary" id="flight-buy-submit">Buy</button>
+                    </div>
+                </div>
+            </form>
+        </section>        
 
         <section>
             <h1>Passenger</h1>

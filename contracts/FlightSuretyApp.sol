@@ -239,7 +239,7 @@ contract FlightSuretyApp is LogHelper {
      * @dev Passenger buy insurance for a flight
      *
      */
-    function buyInsurance(address airline, string flight, uint256 timestamp) 
+    function buyInsurance(string name, address airline, string flight, uint256 timestamp) 
         external 
         payable 
         requireIsOperational {
@@ -248,7 +248,7 @@ contract FlightSuretyApp is LogHelper {
         require(msg.value > 0, "Value sent must be greater than 0");
         require(msg.value <= MAX_INSURANCE_COST, "Value sent exceeded the maximum allowed");
         require(isFlight(airline, flight, timestamp) == true, "Flight is not registered");
-        flightSuretyData.buy.value(msg.value)(msg.sender, airline, flight, timestamp);
+        flightSuretyData.buy.value(msg.value)(name, msg.sender, airline, flight, timestamp);
     }
 
     /**

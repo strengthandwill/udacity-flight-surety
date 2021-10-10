@@ -90,21 +90,26 @@ function loadFlights(contract) {
             tr.appendChild(DOM.td(contract.flights[i].destination));
             tr.appendChild(DOM.td(contract.flights[i].status));
             
-            let actionsTd = DOM.td();
-            actionsTd.appendChild(DOM.button({className: 'btn btn-primary', value: i.toString()}, 'Check Status'));
-            tr.appendChild(actionsTd); 
+            let actionsTd = DOM.td();            
+            if (contract.isAirline) {
+                actionsTd.appendChild(DOM.button({className: 'btn btn-primary mr-3', value: i.toString()}, 'Check Status'));                
+            } else {
+                let buyInsuranceButton = DOM.button({className: 'btn btn-primary mr-3'}, 'Buy Insurance');
+                actionsTd.appendChild(buyInsuranceButton);            
 
-            table.appendChild(tr);                
+                buyInsuranceButton.addEventListener('click', () => {                             
+                    DOM.elid('insurance-buy-flight').innerText = `${contract.flights[i].airline_name} ${contract.flights[i].flight} at ${contract.flights[i].timestamp}, ${contract.flights[i].origin} -> ${contract.flights[i].destination}`;
+                    DOM.elid('insurance-buy-flight-id').value = i.toString();
+                    DOM.elid('insurance-buy').hidden = false;                
+                });   
+            }
+            tr.appendChild(actionsTd);
+            table.appendChild(tr);            
         }
     });
 }
 
 function loadFlightActions(contract) {
-    // contract.getAirlineActions((error, result) => {
-    //     DOM.elid("airline").hidden = !result.isAirline;
-    //     DOM.elid("airline-register").hidden = !result.isFunded;                             
-    // });     
-
     DOM.elid('flight-register-submit').addEventListener('click', () => {            
         // Write transaction            
         let flight = DOM.elid("flight-register-flight").value;
