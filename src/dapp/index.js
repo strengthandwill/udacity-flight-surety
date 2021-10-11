@@ -79,22 +79,38 @@ function loadFlights(contract) {
         let table = DOM.elid("flights-list");
         for (let i=0; i<contract.flights.length; i++) { 
             let tr = DOM.tr();
-            tr.appendChild(DOM.td(contract.flights[i].airline_name));
-            tr.appendChild(DOM.td(contract.flights[i].flight));
-            tr.appendChild(DOM.td(contract.flights[i].timestamp));        
-            tr.appendChild(DOM.td(contract.flights[i].origin));
-            tr.appendChild(DOM.td(contract.flights[i].destination));
-            tr.appendChild(DOM.td(contract.flights[i].status));
+
+            let airline = contract.flights[i].airline;
+            let airline_name = contract.flights[i].airline_name;
+            let flight = contract.flights[i].flight;
+            let timestamp = contract.flights[i].timestamp;    
+            let origin = contract.flights[i].origin;    
+            let destination = contract.flights[i].destination;  
+            let status = contract.flights[i].status;       
+
+            tr.appendChild(DOM.td(airline_name));
+            tr.appendChild(DOM.td(flight));
+            tr.appendChild(DOM.td(timestamp));        
+            tr.appendChild(DOM.td(origin));
+            tr.appendChild(DOM.td(destination));
+            tr.appendChild(DOM.td(status));
             
             let actionsTd = DOM.td();            
             if (contract.isAirline) {
-                actionsTd.appendChild(DOM.button({className: 'btn btn-primary mr-3', value: i.toString()}, 'Check Status'));                
+                let checkStatusButton = DOM.button({className: 'btn btn-primary mr-3'}, 'Check Status');
+                actionsTd.appendChild(checkStatusButton);
+
+                checkStatusButton.addEventListener('click', () => { 
+                    contract.fetchFlightStatus(airline, flight, timestamp, (error, result) => {                        
+                        console.log(error);
+                    });                                              
+                }); 
             } else {
                 let buyInsuranceButton = DOM.button({className: 'btn btn-primary mr-3'}, 'Buy Insurance');
                 actionsTd.appendChild(buyInsuranceButton);            
 
                 buyInsuranceButton.addEventListener('click', () => {                             
-                    DOM.elid('insurance-buy-flight').innerText = `${contract.flights[i].airline_name} ${contract.flights[i].flight} at ${contract.flights[i].timestamp}, ${contract.flights[i].origin} -> ${contract.flights[i].destination}`;
+                    DOM.elid('insurance-buy-flight').innerText = `${airline_name} ${flight} at ${timestamp}, ${origin} -> ${destination}`;
                     DOM.elid('insurance-buy-flight-id').value = i.toString();
                     DOM.elid('insurance-buy').hidden = false;                
                 });   

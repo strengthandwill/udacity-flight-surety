@@ -382,6 +382,11 @@ contract FlightSuretyApp is LogHelper {
         uint8 status
     );
 
+    event OracleRegistered(
+        address oracle,        
+        uint8[3] indexes
+    );
+
     event OracleReport(
         address airline,
         string flight,
@@ -416,6 +421,8 @@ contract FlightSuretyApp is LogHelper {
         uint8[3] memory indexes = generateIndexes(msg.sender);
 
         oracles[msg.sender] = Oracle({isRegistered: true, indexes: indexes});
+
+        emit OracleRegistered(msg.sender, indexes);
     }
 
     function getMyIndexes() external view returns (uint8[3]) {

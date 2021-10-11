@@ -65,17 +65,12 @@ export default class Contract {
             .call({ from: self.owner }, callback);
     }
 
-    fetchFlightStatus(flight, callback) {
-        let self = this;
-        let payload = {
-            airline: self.airlines[0],
-            flight: flight,
-            timestamp: Math.floor(Date.now() / 1000)
-        } 
+    fetchFlightStatus(airline, flight, timestamp, callback) {
+        let self = this;         
         self.flightSuretyApp.methods
-            .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
-                .send({ from: self.owner}, (error, result) => {
-                    callback(error, payload);
+            .fetchFlightStatus(airline, flight, timestamp)
+                .send({ from: self.loginAccount }, (error, result) => {
+                    callback(error, result);
                 });
     }
 
@@ -200,7 +195,7 @@ export default class Contract {
     
     getFlightStatusDesc(statusCode) {
         let status = "Unknown";
-        switch (statusCode) {
+        switch (parseInt(statusCode)) {
             case STATUS_CODE_UNKNOWN: 
                 status = "Unknown";
                 break;
@@ -242,7 +237,6 @@ export default class Contract {
                 return { origin: flightEle.origin, destination: flightEle.destination };
             }
         }
-        console.log("hello2");
         return null;
     }
 
