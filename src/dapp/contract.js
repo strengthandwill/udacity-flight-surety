@@ -227,7 +227,6 @@ export default class Contract {
                 from: self.loginAccount,
                 value: this.web3.utils.toWei(amount, 'ether')
             }, (error, result) => {
-                alert(error);
                 callback(error, result);
             });
     };

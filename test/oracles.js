@@ -52,7 +52,7 @@ contract('Oracles', async (accounts) => {
                       
         // ASSERT
         assert.equal(result.length > 0, true);
-        // console.log(`Oracle Registered: ${result[0]}, ${result[1]}, ${result[2]}`);
+        console.log(`Oracle Registered: ${result[0]}, ${result[1]}, ${result[2]}`);
       }
     });
   });

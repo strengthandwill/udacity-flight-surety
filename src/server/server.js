@@ -65,7 +65,7 @@ flightSuretyApp.events.OracleRequest({
       }              
       catch (e) {
         // Enable this when debugging
-        console.log('\nError', idx, indexes[idx], airline, flight, timestamp, e.message);
+        // console.log('\nError', idx, indexes[idx], airline, flight, timestamp, e.message);
       }
     }
   }
