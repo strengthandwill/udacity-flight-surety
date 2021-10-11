@@ -159,7 +159,6 @@ function loadInsuranceActions(contract) {
         let amount = DOM.elid("insurance-buy-amount").value;
         contract.buyInsurance(name, airline, flight, timestamp, amount, (error, result) => {
             console.log(error);
-            console.log(result);
         });
     });    
 }
@@ -188,7 +187,14 @@ function loadInsurances(contract) {
 
             if (contract.insurees[i].login) {
                 let actionsTd = DOM.td();                        
-                actionsTd.appendChild(DOM.button({className: 'btn btn-primary mr-3', value: i.toString()}, 'Widthdraw'));                            
+                let withdrawButton = DOM.button({className: 'btn btn-primary mr-3', value: i.toString()}, 'Widthdraw');                
+                withdrawButton.addEventListener('click', () => {                             
+                    contract.withdrawPayout((error, result) => {
+                        console.log(error);
+                    });
+                });
+
+                actionsTd.appendChild(withdrawButton);
                 tr.appendChild(actionsTd);
             }
             

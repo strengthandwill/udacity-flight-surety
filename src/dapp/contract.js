@@ -295,5 +295,17 @@ export default class Contract {
                 console.log(error);                
                 callback(error, result);
             });
-    };
+    }
+
+    withdrawPayout(callback) {
+        let self = this;    
+        self.flightSuretyApp.methods
+            .withdrawPayout()
+            .send({ 
+                from: self.loginAccount
+            }, (error, result) => {                
+                console.log(error);                
+                callback(error, result);
+            });
+    }
 }
