@@ -7,6 +7,7 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 (async() => {
     let contract = new Contract('localhost', () => {
+        isOperational(contract);
         checkLoginAccount(contract);
 
         loadAirlines(contract);
@@ -18,6 +19,12 @@ const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
         loadInsuranceActions(contract);
     });    
 })();
+
+function isOperational(contract) {
+    contract.isOperational((error, result) => {
+        DOM.elid("is-operational").innerHTML = result ? "Yes" : "No";        
+    }); 
+}
 
 function checkLoginAccount(contract) {
     contract.checkLoginAirline(() => {
