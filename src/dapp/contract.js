@@ -167,7 +167,8 @@ export default class Contract {
                             timestamp: timestamp,
                             origin: events[i].returnValues.origin,
                             destination: events[i].returnValues.destination,
-                            status: self.getFlightStatusDesc(result.statusCode)
+                            statusCode: result.statusCode,
+                            status: self.getFlightStatusDesc(result.statusCode)                            
                         });
                         if (i == events.length-1) { callback(); }
                     });                         
@@ -234,7 +235,8 @@ export default class Contract {
     getFlightInfo(airline, flight, timestamp) {
         for (let flightEle of this.flights) {            
             if (flightEle.airline == airline && flightEle.flight == flight && flightEle.timestamp == timestamp) {
-                return { origin: flightEle.origin, destination: flightEle.destination };
+                let claimable = flightEle.statusCode == STATUS_CODE_LATE_AIRLINE;
+                return { origin: flightEle.origin, destination: flightEle.destination, claimable: claimable };
             }
         }
         return null;
@@ -276,7 +278,8 @@ export default class Contract {
                             flight: flight,
                             timestamp: timestamp,
                             origin: flightInfo.origin,
-                            destination: flightInfo.destination                           
+                            destination: flightInfo.destination,
+                            claimable: flightInfo.claimable                           
                         });  
                                                                   
                         if (i == events.length-1) { callback(); }                                        
