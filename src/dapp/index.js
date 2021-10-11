@@ -113,8 +113,21 @@ function loadFlights(contract) {
                     DOM.elid('insurance-buy-flight').innerText = `${airline_name} ${flight} at ${timestamp}, ${origin} -> ${destination}`;
                     DOM.elid('insurance-buy-flight-id').value = i.toString();
                     DOM.elid('insurance-buy').hidden = false;                
-                });   
+                });                                 
             }
+
+            if (status == "Late due to Airline") {
+                let claimButton = DOM.button({className: 'btn btn-primary mr-3'}, 'Claim');
+                actionsTd.appendChild(claimButton);            
+
+                claimButton.addEventListener('click', () => {                             
+                    contract.payoutInsurance(airline, flight, timestamp, (error, result) => {
+                        console.log(error);
+                        console.log(result);
+                    });
+                });                                 
+            }
+
             tr.appendChild(actionsTd);
             table.appendChild(tr);            
         }

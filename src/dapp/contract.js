@@ -253,14 +253,13 @@ export default class Contract {
             .getPastEvents('InsuranceBought', {fromBlock: 0, toBLock: 'latest'}, (error, events) => {                                
                 for (let i=0; i<events.length; i++) {
                     let insuree = events[i].returnValues.insuree;
-                    console.log(insuree);
                     self.getInsuree(insuree, async (error, result) => {                                                                        
                         self.insurees.push({
                             login: self.loginAccount == insuree,
                             insuree: insuree,
                             name: result.name,
                             isRegistered: result.isRegistered,
-                            payout: result.payout,
+                            payout: self.web3.utils.fromWei(result.payout, 'ether'),
                         });
 
                         let airline = events[i].returnValues.airline;
@@ -285,4 +284,16 @@ export default class Contract {
                 }                                    
             });        
     }
+
+    payoutInsurance(airline, flight, timestamp, callback) {
+        let self = this;    
+        self.flightSuretyApp.methods
+            .payoutInsurance(airline, flight, timestamp)
+            .send({ 
+                from: self.loginAccount
+            }, (error, result) => {                
+                console.log(error);                
+                callback(error, result);
+            });
+    };
 }
