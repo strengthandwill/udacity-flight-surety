@@ -39,6 +39,8 @@ To build dapp for prod:
 
 Deploy the contents of the ./dapp folder
 
+
+
 # Tests
 
 ## flightSurety.js
@@ -47,8 +49,18 @@ Deploy the contents of the ./dapp folder
 ## oracles.js
 ![](/images/tests-oracles.png)
 
+# Roles
+
+## Airline
+![](/images/roles-airline.png)
+
+## Passenger
+![](/images/roles-passenger.png)
+
+
+
 # Demo
-1) First airline is registered when contract is deployed.
+1) First airline is registered when contract is deployed
 ![](/images/demo1.png)
 
 2) Airline can be registered, but does not participate in contract until it submits funding of 10 ether
@@ -74,7 +86,7 @@ Deploy the contents of the ./dapp folder
 6) Passengers can choose from a fixed list of flight numbers and departure that are defined in the Dapp client
 ![](/images/demo6.png)
 
-7) Passengers may pay up to 1 ether for purchasing flight insurance.
+7) Passengers may pay up to 1 ether for purchasing flight insurance
 ![](/images/demo7.1.png)
 ![](/images/demo7.2.png)
 ![](/images/demo7.3.png)
