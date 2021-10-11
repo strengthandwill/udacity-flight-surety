@@ -86,7 +86,7 @@ function loadFlights(contract) {
 
             tr.appendChild(DOM.td(airline_name));
             tr.appendChild(DOM.td(flight));
-            tr.appendChild(DOM.td(timestamp));        
+            tr.appendChild(DOM.td(convertFromTimestamp(timestamp).toLocaleString()));        
             tr.appendChild(DOM.td(origin));
             tr.appendChild(DOM.td(destination));
             tr.appendChild(DOM.td(status));
@@ -106,7 +106,7 @@ function loadFlights(contract) {
                 actionsTd.appendChild(buyInsuranceButton);            
 
                 buyInsuranceButton.addEventListener('click', () => {                             
-                    DOM.elid('insurance-buy-flight').innerText = `${airline_name} ${flight} at ${timestamp}, ${origin} -> ${destination}`;
+                    DOM.elid('insurance-buy-flight').innerText = `${airline_name} ${flight} at ${convertFromTimestamp(timestamp).toLocaleString()}, ${origin} -> ${destination}`;
                     DOM.elid('insurance-buy-flight-id').value = i.toString();
                     DOM.elid('insurance-buy').hidden = false;                
                 });                                 
@@ -122,7 +122,7 @@ function loadFlightActions(contract) {
     DOM.elid('flight-register-submit').addEventListener('click', () => {            
         // Write transaction            
         let flight = DOM.elid("flight-register-flight").value;
-        let timestamp = DOM.elid("flight-register-timestamp").value;
+        let timestamp = convertToTimestamp(DOM.elid("flight-register-timestamp").value);
         let origin = DOM.elid("flight-register-origin").value;
         let destination = DOM.elid("flight-register-destination").value;
         
@@ -155,7 +155,7 @@ function loadInsurances(contract) {
             tr.appendChild(DOM.td(insurance.insuree_name));
             tr.appendChild(DOM.td(insurance.airline_name));
             tr.appendChild(DOM.td(insurance.flight));
-            tr.appendChild(DOM.td(insurance.timestamp));
+            tr.appendChild(DOM.td(convertFromTimestamp(insurance.timestamp).toLocaleString()));
             tr.appendChild(DOM.td(insurance.origin));
             tr.appendChild(DOM.td(insurance.destination));
             tr.appendChild(DOM.td(`${insurance.paid} ETH`));
@@ -200,6 +200,14 @@ function loadInsurances(contract) {
             insureesTable.appendChild(tr);
         }
     });
+}
+
+function convertFromTimestamp(value) {
+    return new Date(value*1000);
+}    
+
+function convertToTimestamp(value) {
+    return new Date(value).getTime() / 1000;
 }
 
 
