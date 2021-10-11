@@ -48,8 +48,8 @@ var Config = async function(accounts) {
         fifthAirline    : { airline: accounts[5], name: "Fifth Airline"},
         tenthAirline    : { airline: accounts[10], name: "Tenth Airline"},
         firstFlight     : { flight: "ND1309", timestamp: 12345678, origin: "Singapore", destination: "Hong Kong" },
-        firstPassenger  : accounts[11],
-        secondPassenger : accounts[12]
+        firstPassenger  : { passenger: accounts[11], name: "John Smith" },
+        secondPassenger : { passenger: accounts[12], name: "John Doe" }
     }
 }
 

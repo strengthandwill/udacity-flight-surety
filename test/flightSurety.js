@@ -267,16 +267,17 @@ contract('Flight Surety Tests', async (accounts) => {
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {                
                 await config.flightSuretyApp.buyInsurance(
+                    config.firstPassenger.name,
                     config.firstAirline.airline,                    
                     config.firstFlight.flight, 
                     config.firstFlight.timestamp,                     
-                    { from: config.firstPassenger, value: TEN_ETHER });
+                    { from: config.firstPassenger.passenger, value: TEN_ETHER });
             }
             catch (e) {
                 reverted = true;
             }
             let result = await config.flightSuretyData.isInsuranceBought.call(
-                config.firstPassenger,
+                config.firstPassenger.passenger,
                 config.firstAirline.airline,
                 config.firstFlight.flight, 
                 config.firstFlight.timestamp
@@ -295,16 +296,17 @@ contract('Flight Surety Tests', async (accounts) => {
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {                
                 await config.flightSuretyApp.buyInsurance(
+                    config.firstPassenger.name,
                     config.firstAirline.airline,                    
                     config.firstFlight.flight, 
                     config.firstFlight.timestamp,                     
-                    { from: config.firstPassenger, value: ONE_ETHER });
+                    { from: config.firstPassenger.passenger, value: ONE_ETHER });
             }
             catch (e) {
                 console.log(e.message);
             }
             let result = await config.flightSuretyData.isInsuranceBought.call(
-                config.firstPassenger,
+                config.firstPassenger.passenger,
                 config.firstAirline.airline,
                 config.firstFlight.flight, 
                 config.firstFlight.timestamp
@@ -325,7 +327,7 @@ contract('Flight Surety Tests', async (accounts) => {
             const ELEVEN_ETHER = web3.utils.toWei("11", "ether");
 
             let reverted = false;
-            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);            
+            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger.passenger);            
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
             try {                              
                 await config.flightSuretyApp.updateFlightStatus(
@@ -343,7 +345,7 @@ contract('Flight Surety Tests', async (accounts) => {
             catch (e) {
                 reverted = true;
             }            
-            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
+            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger.passenger);
             let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);
 
             // ASSERT
@@ -356,9 +358,9 @@ contract('Flight Surety Tests', async (accounts) => {
 
         it ("If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid and\n\tInsurance payouts are not sent directly to passenger’s wallet", async() => {
             // ACT
-            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);            
+            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger.passenger);            
             let beforeAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);            
-            let beforeBalance = await await web3.eth.getBalance(config.firstPassenger);                        
+            let beforeBalance = await await web3.eth.getBalance(config.firstPassenger.passenger);                        
             try {                              
                 await config.flightSuretyApp.updateFlightStatus(
                     config.firstAirline.airline,                    
@@ -375,9 +377,9 @@ contract('Flight Surety Tests', async (accounts) => {
             catch (e) {
                 console.log(e.message);
             }            
-            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
+            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger.passenger);
             let afterAirlineFunds = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline.airline);
-            let afterBalance = await await web3.eth.getBalance(config.firstPassenger);                        
+            let afterBalance = await await web3.eth.getBalance(config.firstPassenger.passenger);                        
 
             // ASSERT
             assert.equal(beforeInsureePayout, 0);
@@ -394,15 +396,15 @@ contract('Flight Surety Tests', async (accounts) => {
         it('Passenger cannot withdraw funds if they have not bought the insurance', async() => {
             // ACT
             let reverted = false;
-            let beforeBalance = await await web3.eth.getBalance(config.secondPassenger);  
-            let isInsuree = await config.flightSuretyData.isInsuree(config.secondPassenger);
+            let beforeBalance = await await web3.eth.getBalance(config.secondPassenger.passenger);  
+            let isInsuree = await config.flightSuretyData.isInsuree(config.secondPassenger.passenger);
             try {                      
-                await config.flightSuretyApp.withdrawPayout({ from: config.secondPassenger, gasPrice: 0 });                
+                await config.flightSuretyApp.withdrawPayout({ from: config.secondPassenger.passenger, gasPrice: 0 });                
             }
             catch (e) {
                 reverted = true;
             }
-            let afterBalance = await await web3.eth.getBalance(config.secondPassenger);            
+            let afterBalance = await await web3.eth.getBalance(config.secondPassenger.passenger);            
 
             // ASSERT
             assert.equal(isInsuree, false, "Passenger should not have bought the insurance");                       
@@ -412,16 +414,16 @@ contract('Flight Surety Tests', async (accounts) => {
         
         it('Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout', async() => {
             // ACT            
-            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
-            let beforeBalance = await await web3.eth.getBalance(config.firstPassenger);            
+            let beforeInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger.passenger);
+            let beforeBalance = await await web3.eth.getBalance(config.firstPassenger.passenger);            
             try {                      
-                await config.flightSuretyApp.withdrawPayout({ from: config.firstPassenger, gasPrice: 0 });                
+                await config.flightSuretyApp.withdrawPayout({ from: config.firstPassenger.passenger, gasPrice: 0 });                
             }
             catch (e) {
                 console.log(e.message);
             }
-            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger);
-            let afterBalance = await await web3.eth.getBalance(config.firstPassenger);            
+            let afterInsureePayout = await config.flightSuretyData.getInsureePayout.call(config.firstPassenger.passenger);
+            let afterBalance = await await web3.eth.getBalance(config.firstPassenger.passenger);            
 
             // ASSERT
             assert.equal(beforeInsureePayout, ONE_HALF_ETHER);            
