@@ -53,8 +53,7 @@ flightSuretyApp.events.OracleRequest({
       let timestamp = event.returnValues.timestamp;
       let statusCode = parseInt(Math.random() * 6) * 10;
       try {
-        // Submit a response...it will only be accepted if there is an Index match
-        // let statusCode = STATUS_CODE_LATE_AIRLINE;      
+        // Submit a response...it will only be accepted if there is an Index match      
         await flightSuretyApp.methods.submitOracleResponse(
           indexes[idx], 
           airline, 
