@@ -1,4 +1,4 @@
-# FlightSurety
+# Udacity Flight Surety
 
 FlightSurety is a sample application project for Udacity's Blockchain course.
 
